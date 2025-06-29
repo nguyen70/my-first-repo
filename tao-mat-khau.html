@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình tạo mật khẩu ngẫu nhiên</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .password-display {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        label {
+            display: inline-block;
+            margin: 5px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trình Tạo Mật Khẩu Ngẫu Nhiên</h1>
+        
+        <div class="password-display" id="password">Nhấn nút để tạo mật khẩu</div>
+        
+        <div class="controls">
+            <label>
+                Độ dài: <input type="number" id="length" min="4" max="64" value="12">
+            </label>
+            <br>
+            <label><input type="checkbox" id="uppercase" checked> Chữ hoa (A-Z)</label>
+            <label><input type="checkbox" id="lowercase" checked> Chữ thường (a-z)</label>
+            <label><input type="checkbox" id="numbers" checked> Số (0-9)</label>
+            <label><input type="checkbox" id="symbols" checked> Ký tự đặc biệt (!@#$%)</label>
+        </div>
+        
+        <button onclick="generatePassword()">Tạo Mật Khẩu</button>
+        <button onclick="copyPassword()">Sao Chép</button>
+    </div>
+
+    <script>
+        function generatePassword() {
+            const length = document.getElementById('length').value;
+            const uppercase = document.getElementById('uppercase').checked;
+            const lowercase = document.getElementById('lowercase').checked;
+            const numbers = document.getElementById('numbers').checked;
+            const symbols = document.getElementById('symbols').checked;
+            
+            let chars = '';
+            if (uppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (lowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+            if (numbers) chars += '0123456789';
+            if (symbols) chars += '!@#$%^&*()_+~`|}{[]:;?><,./-=';
+            
+            if (!chars) {
+                alert('Vui lòng chọn ít nhất một loại ký tự!');
+                return;
+            }
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * chars.length);
+                password += chars[randomIndex];
+            }
+            
+            document.getElementById('password').textContent = password;
+        }
+        
+        function copyPassword() {
+            const password = document.getElementById('password').textContent;
+            if (password && password !== 'Nhấn nút để tạo mật khẩu') {
+                navigator.clipboard.writeText(password)
+                    .then(() => alert('Đã sao chép mật khẩu!'))
+                    .catch(err => alert('Lỗi khi sao chép: ' + err));
+            } else {
+                alert('Không có mật khẩu để sao chép!');
+            }
+        }
+    </script>
+</body>
+</html>
