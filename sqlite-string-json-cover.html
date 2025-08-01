@@ -46,9 +46,14 @@
 
     <script>
         function convertToJson() {
-            // Lấy nội dung và loại bỏ ký tự xuống dòng
+            // Lấy nội dung và xử lý
             let textContent = document.getElementById('textInput').value;
-            textContent = textContent.replace(/(\r\n|\n|\r)/gm, " ").trim();
+            
+            // Xóa ký tự xuống dòng và thay bằng khoảng trắng
+            textContent = textContent.replace(/(\r\n|\n|\r)/gm, " ");
+            
+            // Thay thế nhiều khoảng trắng liên tiếp bằng một khoảng trắng
+            textContent = textContent.replace(/\s+/g, ' ').trim();
             
             // Tạo object JSON đơn giản chỉ chứa content
             const jsonObject = {
