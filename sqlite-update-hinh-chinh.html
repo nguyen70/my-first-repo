@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Main Image Updater</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        textarea {
+            min-height: 200px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Product Main Image Updater</h1>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="startId" class="block text-sm font-medium text-gray-700 mb-1">Start Product ID</label>
+                    <input type="number" id="startId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="1" min="1">
+                </div>
+                
+                <div>
+                    <label for="endId" class="block text-sm font-medium text-gray-700 mb-1">End Product ID</label>
+                    <input type="number" id="endId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="10" min="1">
+                </div>
+                
+                <div>
+                    <label for="imageTemplate" class="block text-sm font-medium text-gray-700 mb-1">Image URL Template</label>
+                    <input type="text" id="imageTemplate" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="https://dummyimage.com/800x600/ffebee/ff5252.png&text=Product+{id}+Main">
+                    <p class="text-xs text-gray-500 mt-1">Use {id} for product ID placeholder</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="randomColors" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                    <label for="randomColors" class="ml-2 block text-sm text-gray-700">Random background & text colors</label>
+                </div>
+                
+                <button id="generateBtn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Generate Update SQL
+                </button>
+            </div>
+            
+            <div class="mt-6">
+                <label for="sqlOutput" class="block text-sm font-medium text-gray-700 mb-1">Generated SQL</label>
+                <textarea id="sqlOutput" class="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm" readonly></textarea>
+            </div>
+            
+            <div class="mt-4 flex justify-end">
+                <button id="copyBtn" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Function to generate random hex color
+            function getRandomColor() {
+                return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            }
+            
+            $('#generateBtn').click(function() {
+                const startId = parseInt($('#startId').val());
+                const endId = parseInt($('#endId').val());
+                const imageTemplate = $('#imageTemplate').val();
+                const useRandomColors = $('#randomColors').is(':checked');
+                
+                if (startId > endId) {
+                    alert('Start ID must be less than or equal to End ID');
+                    return;
+                }
+                
+                let sql = '';
+                
+                for (let productId = startId; productId <= endId; productId++) {
+                    // Replace placeholder in image URL
+                    let imageUrl = imageTemplate.replace('{id}', productId);
+                    
+                    // If random colors enabled, replace color parts
+                    if (useRandomColors) {
+                        const bgColor = getRandomColor().replace('#', '');
+                        const textColor = getRandomColor().replace('#', '');
+                        
+                        // This assumes the URL follows dummyimage.com format with /bgColor/textColor
+                        imageUrl = imageUrl.replace(/\/[a-f0-9]{6}\//, `/${bgColor}/`)
+                                          .replace(/\.png&text=.*/, `.png&text=Product+${productId}+Main`);
+                    }
+                    
+                    // Add UPDATE SQL statement
+                    sql += `UPDATE products SET main_image = '${imageUrl}' WHERE id = ${productId};\n`;
+                }
+                
+                $('#sqlOutput').val(sql);
+            });
+            
+            $('#copyBtn').click(function() {
+                const sqlOutput = $('#sqlOutput');
+                sqlOutput.select();
+                document.execCommand('copy');
+                
+                // Show feedback
+                const originalText = $(this).text();
+                $(this).text('Copied!');
+                setTimeout(() => {
+                    $(this).text(originalText);
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
