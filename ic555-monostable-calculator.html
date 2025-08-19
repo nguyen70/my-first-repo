@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IC 555 Monostable Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
+    <div id="app" class="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800">Advanced IC 555 Monostable Calculator</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="vcc" class="block text-sm font-medium text-gray-700">Supply Voltage (VCC)</label>
+                <div class="mt-1 flex rounded-md shadow-sm">
+                    <input type="number" v-model.number="vcc" id="vcc" class="block w-full flex-1 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="e.g., 12">
+                     <span class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">V</span>
+                </div>
+            </div>
+            <div>
+                <label for="ic_leakage" class="block text-sm font-medium text-gray-700">IC Trigger Leakage (I_trig)</label>
+                <div class="mt-1 flex rounded-md shadow-sm">
+                    <input type="number" v-model.number="i_leak_ic" id="ic_leakage" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="e.g., 100">
+                    <select v-model="i_leak_ic_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                        <option value="0.000000001">nA</option>
+                        <option value="0.000000000001">pA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label for="resistance" class="block text-sm font-medium text-gray-700">Timing Resistor (R)</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="r" id="resistance" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3">
+                <select v-model="r_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                    <option value="1">Ω</option>
+                    <option value="1000">kΩ</option>
+                    <option value="1000000">MΩ</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="capacitance" class="block text-sm font-medium text-gray-700">Capacitor (C)</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="c" id="capacitance" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3">
+                <select v-model="c_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                    <option value="0.000001">µF</option>
+                    <option value="0.000000001">nF</option>
+                    <option value="0.001">mF</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="cap_leakage" class="block text-sm font-medium text-gray-700">Capacitor Leakage Current (I_leak)</label>
+             <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="i_leak_cap" id="cap_leakage" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="e.g., 5.64">
+                <span class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">µA</span>
+            </div>
+        </div>
+
+        <div v-if="analysis.error" class="p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+            <p class="font-bold">Error: {{ analysis.error }}</p>
+            <p class="text-sm">Final voltage ({{ analysis.v_final.toFixed(2) }}V) will not reach threshold ({{ analysis.v_threshold.toFixed(2) }}V). Try reducing R.</p>
+        </div>
+        <div v-else class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
+            <p class="font-bold">Time Period (T): {{ formattedTime }}</p>
+        </div>
+
+        <div class="text-center text-gray-600 text-sm space-y-1 bg-gray-50 p-3 rounded-md">
+            <p class="font-semibold">Analysis:</p>
+            <p>V_threshold = 2/3 &times; VCC = <strong>{{ analysis.v_threshold.toFixed(2) }} V</strong></p>
+            <p>V_final = VCC - (I_total_leak &times; R) = <strong>{{ analysis.v_final.toFixed(2) }} V</strong></p>
+            <p class="font-semibold mt-2">Formula:</p>
+            <p>T = R &times; C &times; ln( (V_final) / (V_final - V_threshold) )</p>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue
+
+        createApp({
+            setup() {
+                const vcc = ref(12);
+                const r = ref(13);
+                const r_unit = ref(1000000); // MΩ
+                const c = ref(47);
+                const c_unit = ref(0.000001); // µF
+                const i_leak_cap = ref(5.64); // µA
+                const i_leak_ic = ref(100);
+                const i_leak_ic_unit = ref(0.000000001); // nA
+
+                const analysis = computed(() => {
+                    const R_ohms = r.value * r_unit.value;
+                    const C_farads = c.value * c_unit.value;
+                    const I_leak_cap_amps = i_leak_cap.value * 0.000001;
+                    const I_leak_ic_amps = i_leak_ic.value * i_leak_ic_unit.value;
+
+                    if (!(vcc.value > 0 && R_ohms > 0 && C_farads > 0)) {
+                        return { error: "Inputs must be positive.", v_final: 0, v_threshold: 0, time: 0 };
+                    }
+
+                    const I_total_leak = I_leak_cap_amps + I_leak_ic_amps;
+                    const V_final = vcc.value - (I_total_leak * R_ohms);
+                    const V_threshold = (2 / 3) * vcc.value;
+
+                    if (V_final <= V_threshold) {
+                        return {
+                            error: "Charging current is less than or equal to leakage current.",
+                            v_final: V_final,
+                            v_threshold: V_threshold,
+                            time: Infinity
+                        };
+                    }
+
+                    const T = R_ohms * C_farads * Math.log(V_final / (V_final - V_threshold));
+
+                    return {
+                        error: null,
+                        v_final: V_final,
+                        v_threshold: V_threshold,
+                        time: T
+                    };
+                });
+
+                const formattedTime = computed(() => {
+                    const t = analysis.value.time;
+                    if (t === Infinity) return "Infinite";
+                    if (t === 0) return '0 s';
+                    if (t >= 31536000) return (t / 31536000).toFixed(2) + ' y';
+                    if (t >= 2592000) return (t / 2592000).toFixed(2) + ' mo';
+                    if (t >= 86400) return (t / 86400).toFixed(2) + ' d';
+                    if (t >= 3600) return (t / 3600).toFixed(2) + ' h';
+                    if (t >= 60) return (t / 60).toFixed(2) + ' m';
+                    if (t < 0.001) return (t * 1000).toFixed(3) + ' ms';
+                    if (t < 1) return t.toFixed(3) + ' s';
+                    return t.toFixed(2) + ' s';
+                });
+
+                return {
+                    vcc,
+                    r,
+                    r_unit,
+                    c,
+                    c_unit,
+                    i_leak_cap,
+                    i_leak_ic,
+                    i_leak_ic_unit,
+                    analysis,
+                    formattedTime
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

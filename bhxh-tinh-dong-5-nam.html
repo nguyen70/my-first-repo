@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tính Bảo Hiểm Xã Hội Tự Nguyện Một Lần</title>
+</head>
+<body>
+
+    <h1>Tính Bảo Hiểm Xã Hội Tự Nguyện Một Lần</h1>
+    <p>Kết quả tính toán sẽ hiển thị dưới đây:</p>
+
+    <div id="ketQua"></div>
+
+    <script>
+        /**
+         * Tính số tiền đóng bảo hiểm xã hội tự nguyện một lần cho n năm.
+         * Công thức: MD_n = Σ_{i=1}^{n x 12} (TN_i x 22%) / (1 + r)^(i-1)
+         *
+         * @param {number} mucThuNhap - Mức thu nhập làm căn cứ đóng (TN_i) tính bằng đồng/tháng.
+         * @param {number} laiSuatThang - Lãi suất đầu tư quỹ bảo hiểm xã hội bình quân tháng (r), nhập dưới dạng thập phân (ví dụ: 0.5% -> 0.005).
+         * @param {number} soNam - Số năm đóng (n), giá trị từ 2 đến 5.
+         * @returns {number} - Tổng số tiền cần đóng một lần (MD_n) tính bằng đồng.
+         */
+        function tinhBaoHiemXaHoiMotLan(mucThuNhap, laiSuatThang, soNam) {
+            // Kiểm tra điều kiện số năm
+            if (soNam < 2 || soNam > 5) {
+                return "Lỗi: Số năm đóng không hợp lệ. Vui lòng chọn giá trị từ 2 đến 5.";
+            }
+
+            const tiLeDong = 0.22; // 22%
+            let tongTienCanDong = 0;
+
+            // Lặp qua từng tháng trong tổng số năm
+            for (let i = 1; i <= soNam * 12; i++) {
+                // Mức đóng của tháng thứ i
+                const mucDongThang = mucThuNhap * tiLeDong;
+
+                // Tính giá trị hiện tại (chiết khấu) của mức đóng tháng thứ i
+                const giaTriHienTai = mucDongThang / Math.pow((1 + laiSuatThang), (i - 1));
+
+                // Cộng dồn vào tổng số tiền
+                tongTienCanDong += giaTriHienTai;
+            }
+
+            return tongTienCanDong;
+        }
+
+        // =============================================================
+        // Ví dụ sử dụng:
+        // Giả sử:
+        // - Mức thu nhập làm căn cứ đóng (TN_i) là 5.000.000 VNĐ/tháng.
+        // - Lãi suất bình quân tháng (r) là 0.5% (tương đương 0.005).
+        // - Số năm đóng (n) là 5 năm.
+        // =============================================================
+
+        const mucThuNhapViDu = 5000000;
+        const laiSuatThangViDu = 0.005; // 0.5%
+        const soNamViDu = 5;
+
+        const tongTien = tinhBaoHiemXaHoiMotLan(mucThuNhapViDu, laiSuatThangViDu, soNamViDu);
+
+        // Hiển thị kết quả ra trang HTML
+        const ketQuaDiv = document.getElementById('ketQua');
+        if (typeof tongTien === 'string') {
+            ketQuaDiv.innerHTML = `<p style="color: red;">${tongTien}</p>`;
+        } else {
+            ketQuaDiv.innerHTML = `
+                <p>Mức thu nhập làm căn cứ đóng: <strong>${mucThuNhapViDu.toLocaleString('vi-VN')} VNĐ/tháng</strong></p>
+                <p>Lãi suất bình quân tháng: <strong>${(laiSuatThangViDu * 100)}%</strong></p>
+                <p>Số năm đóng: <strong>${soNamViDu} năm</strong></p>
+                <hr>
+                <h3>Tổng số tiền cần đóng một lần là: <strong>${tongTien.toLocaleString('vi-VN')} VNĐ</strong></h3>
+            `;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloom Filter Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto mt-10 p-5 bg-white rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-center mb-5">Bloom Filter Calculator</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="n" class="block text-sm font-medium text-gray-700">Number of items (n)</label>
+                <input type="number" id="n" v-model.number="n" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="p" class="block text-sm font-medium text-gray-700">False positive probability (p)</label>
+                <input type="number" id="p" v-model.number="p" step="0.001" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <button @click="calculate" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">Calculate</button>
+        </div>
+        <div id="results" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h2 class="text-lg font-bold mb-2">Standard Bloom Filter</h2>
+                <p>Size of bit array (m): <span class="font-mono">{{ m_standard }}</span> (<span class="font-mono">{{ m_formatted }}</span>)</p>
+                <p>Number of hash functions (k): <span class="font-mono">{{ k_standard }}</span></p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h2 class="text-lg font-bold mb-2">Counting Bloom Filter</h2>
+                <p>Size of counter array (m): <span class="font-mono">{{ m_counting }}</span></p>
+                <p>Number of hash functions (k): <span class="font-mono">{{ k_counting }}</span></p>
+                <div class="mt-2">
+                    <label for="counter_bits" class="block text-sm font-medium text-gray-700">Bits per counter</label>
+                    <input type="number" id="counter_bits" v-model.number="counterBits" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <p class="mt-2">Total size in bits: <span class="font-mono">{{ totalBitsCounting }}</span> (<span class="font-mono">{{ totalBitsCountingFormatted }}</span>)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                n: 1000,
+                p: 0.01,
+                counterBits: 4,
+                m_standard: 0,
+                k_standard: 0,
+                m_counting: 0,
+                k_counting: 0,
+                totalBitsCounting: 0,
+            },
+            computed: {
+                m_formatted() {
+                    return this.formatBytes(this.m_standard);
+                },
+                totalBitsCountingFormatted() {
+                    return this.formatBytes(this.totalBitsCounting);
+                }
+            },
+            methods: {
+                calculate() {
+                    const n = this.n;
+                    const p = this.p;
+                    const counterBits = this.counterBits;
+
+                    if (isNaN(n) || isNaN(p) || n <= 0 || p <= 0 || p >= 1) {
+                        alert("Please enter valid values for n and p.");
+                        return;
+                    }
+
+                    const m = - (n * Math.log(p)) / (Math.pow(Math.log(2), 2));
+                    const k = (m / n) * Math.log(2);
+
+                    this.m_standard = Math.ceil(m);
+                    this.k_standard = Math.ceil(k);
+
+                    this.m_counting = Math.ceil(m);
+                    this.k_counting = Math.ceil(k);
+
+                    if (!isNaN(counterBits) && counterBits > 0) {
+                        this.totalBitsCounting = Math.ceil(m) * counterBits;
+                    } else {
+                        this.totalBitsCounting = 'N/A';
+                    }
+                },
+                formatBytes(bits) {
+                    if (bits === 0) return '0 Bits';
+                    const bytes = bits / 8; // Convert bits to bytes
+                    const k = 1024;
+                    const sizes = ['Bits', 'Bytes', 'KB', 'MB', 'GB', 'TB'];
+
+                    if (bits < 8) return bits + ' ' + sizes[0]; // Less than 1 byte
+
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i + 1]; // +1 because sizes[0] is 'Bits'
+                }
+            },
+            mounted() {
+                this.calculate();
+            }
+        });
+    </script>
+</body>
+</html>

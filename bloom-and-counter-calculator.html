@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloom Filter and Bloom Counter Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+        .results p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bloom Filter and Bloom Counter Calculator</h1>
+
+        <section>
+            <h2>Bloom Filter Calculation</h2>
+            <div class="input-group">
+                <label for="bloomItems">Number of items (n):</label>
+                <input type="number" id="bloomItems" value="100000" min="1">
+            </div>
+            <div class="input-group">
+                <label for="bloomFalsePositive">False positive probability (p):</label>
+                <input type="number" id="bloomFalsePositive" value="0.01" min="0.0000001" max="0.9999999" step="0.0000001">
+            </div>
+            <button onclick="calculateBloomFilter()">Calculate Bloom Filter</button>
+            <div class="results" id="bloomResults">
+                <p><strong>Optimal number of bits (m):</strong> <span id="bloomM"></span></p>
+                <p><strong>Optimal number of hash functions (k):</strong> <span id="bloomK"></span></p>
+                <p><strong>Total memory:</strong> <span id="bloomTotalMemory"></span></p>
+            </div>
+        </section>
+
+        <hr style="margin: 30px 0;">
+
+        <section>
+            <h2>Bloom Counter Calculation</h2>
+            <div class="input-group">
+                <label for="counterItems">Number of items (n):</label>
+                <input type="number" id="counterItems" value="100000" min="1">
+            </div>
+            <div class="input-group">
+                <label for="counterFalsePositive">False positive probability (p):</label>
+                <input type="number" id="counterFalsePositive" value="0.01" min="0.0000001" max="0.9999999" step="0.0000001">
+            </div>
+            <div class="input-group">
+                <label for="counterSize">Counter size (c, bits per counter):</label>
+                <input type="number" id="counterSize" value="4" min="1">
+            </div>
+            <button onclick="calculateBloomCounter()">Calculate Bloom Counter</button>
+            <div class="results" id="counterResults">
+                <p><strong>Optimal number of bits (m):</strong> <span id="counterM"></span></p>
+                <p><strong>Optimal number of hash functions (k):</strong> <span id="counterK"></span></p>
+                <p><strong>Total memory (bits):</strong> <span id="counterTotalMemory"></span></p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function calculateBloomFilter() {
+            const n = parseFloat(document.getElementById('bloomItems').value);
+            const p = parseFloat(document.getElementById('bloomFalsePositive').value);
+
+            if (isNaN(n) || n <= 0 || isNaN(p) || p <= 0 || p >= 1) {
+                alert('Please enter valid positive numbers for items and a probability between 0 and 1.');
+                return;
+            }
+
+            // Optimal number of bits (m)
+            // m = -(n * ln(p)) / (ln(2)^2)
+            const m = Math.ceil(-(n * Math.log(p)) / (Math.log(2) * Math.log(2)));
+
+            // Optimal number of hash functions (k)
+            // k = (m / n) * ln(2)
+            const k = Math.round((m / n) * Math.log(2));
+
+            document.getElementById('bloomM').textContent = m;
+            document.getElementById('bloomK').textContent = k;
+            document.getElementById('bloomTotalMemory').textContent = formatBytes(m);
+        }
+
+        function calculateBloomCounter() {
+            const n = parseFloat(document.getElementById('counterItems').value);
+            const p = parseFloat(document.getElementById('counterFalsePositive').value);
+            const c = parseInt(document.getElementById('counterSize').value);
+
+            if (isNaN(n) || n <= 0 || isNaN(p) || p <= 0 || p >= 1 || isNaN(c) || c <= 0) {
+                alert('Please enter valid positive numbers for items, a probability between 0 and 1, and a positive counter size.');
+                return;
+            }
+
+            // For Bloom Counter, the formulas for m and k are similar to Bloom Filter,
+            // but the false positive probability might be adjusted based on counter size.
+            // A common approach is to use the standard Bloom filter formulas for m and k,
+            // and then multiply m by c for total memory.
+
+            // Optimal number of bits (m) for the array of counters
+            // m = -(n * ln(p)) / (ln(2)^2)
+            const m = Math.ceil(-(n * Math.log(p)) / (Math.log(2) * Math.log(2)));
+
+            // Optimal number of hash functions (k)
+            // k = (m / n) * ln(2)
+            const k = Math.round((m / n) * Math.log(2));
+
+            // Total memory for Bloom Counter
+            const totalMemory = m * c;
+
+            document.getElementById('counterM').textContent = m;
+            document.getElementById('counterK').textContent = k;
+            document.getElementById('counterTotalMemory').textContent = formatBytes(totalMemory);
+        }
+
+        function formatBytes(bits) {
+            if (bits === 0) return '0 Bits';
+
+            const k = 1024; // Use 1024 for binary units
+            const sizes = ['Bits', 'Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bits) / Math.log(k));
+
+            if (i === 0) { // Handle bits specifically
+                return parseFloat(bits.toFixed(2)) + ' ' + sizes[i];
+            } else {
+                return parseFloat((bits / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }
+
+        // Initial calculation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateBloomFilter();
+            calculateBloomCounter();
+        });
+    </script>
+</body>
+</html>

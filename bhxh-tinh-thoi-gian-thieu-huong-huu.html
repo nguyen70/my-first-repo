@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tính Mức Đóng BHXH Còn Thiếu</title>
+</head>
+<body>
+
+    <h1>Tính Mức Đóng Bảo Hiểm Xã Hội Còn Thiếu</h1>
+    <p>Kết quả tính toán sẽ hiển thị dưới đây:</p>
+
+    <div id="ketQua"></div>
+
+    <script>
+        /**
+         * Tính mức đóng bảo hiểm xã hội tự nguyện một lần cho thời gian còn thiếu.
+         * Công thức: MD_t = Σ_{i=1}^{t} (TN_i x 22%) x (1 + r)^i
+         *
+         * @param {number} mucThuNhap - Mức thu nhập làm căn cứ đóng (TN_i) tính bằng đồng/tháng.
+         * @param {number} laiSuatThang - Lãi suất đầu tư quỹ bảo hiểm xã hội bình quân tháng (r), nhập dưới dạng thập phân (ví dụ: 0.5% -> 0.005).
+         * @param {number} soThang - Số tháng đóng bảo hiểm xã hội còn thiếu (t), giá trị từ 1 đến 60.
+         * @returns {number|string} - Tổng số tiền cần đóng một lần (MD_t) tính bằng đồng, hoặc thông báo lỗi nếu có.
+         */
+        function tinhBaoHiemXaHoiThieu(mucThuNhap, laiSuatThang, soThang) {
+            // Kiểm tra điều kiện số tháng
+            if (soThang < 1 || soThang > 60) {
+                return "Lỗi: Số tháng đóng còn thiếu không hợp lệ. Vui lòng chọn giá trị từ 1 đến 60.";
+            }
+
+            const tiLeDong = 0.22; // 22%
+            let tongTienCanDong = 0;
+
+            // Lặp qua từng tháng còn thiếu
+            for (let i = 1; i <= soThang; i++) {
+                // Mức đóng của tháng thứ i
+                const mucDongThang = mucThuNhap * tiLeDong;
+
+                // Tính giá trị tương lai của mức đóng tháng thứ i
+                const giaTriTuongLai = mucDongThang * Math.pow((1 + laiSuatThang), i);
+
+                // Cộng dồn vào tổng số tiền
+                tongTienCanDong += giaTriTuongLai;
+            }
+
+            return tongTienCanDong;
+        }
+
+        // =============================================================
+        // Ví dụ sử dụng:
+        // Giả sử:
+        // - Mức thu nhập làm căn cứ đóng (TN_i) là 4.500.000 VNĐ/tháng.
+        // - Lãi suất bình quân tháng (r) là 0.5% (tương đương 0.005).
+        // - Số tháng còn thiếu (t) là 48 tháng (4 năm).
+        // =============================================================
+
+        const mucThuNhapViDu = 4500000;
+        const laiSuatThangViDu = 0.005; // 0.5%
+        const soThangViDu = 60;
+
+        const tongTien = tinhBaoHiemXaHoiThieu(mucThuNhapViDu, laiSuatThangViDu, soThangViDu);
+
+        // Hiển thị kết quả ra trang HTML
+        const ketQuaDiv = document.getElementById('ketQua');
+        if (typeof tongTien === 'string') {
+            ketQuaDiv.innerHTML = `<p style="color: red;">${tongTien}</p>`;
+        } else {
+            ketQuaDiv.innerHTML = `
+                <p>Mức thu nhập làm căn cứ đóng: <strong>${mucThuNhapViDu.toLocaleString('vi-VN')} VNĐ/tháng</strong></p>
+                <p>Lãi suất bình quân tháng: <strong>${(laiSuatThangViDu * 100)}%</strong></p>
+                <p>Số tháng còn thiếu: <strong>${soThangViDu} tháng</strong></p>
+                <hr>
+                <h3>Tổng số tiền cần đóng một lần là: <strong>${tongTien.toLocaleString('vi-VN')} VNĐ</strong></h3>
+            `;
+        }
+    </script>
+
+</body>
+</html>

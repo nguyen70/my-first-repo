@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IC 555 Astable Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div id="app" class="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800">IC 555 Astable Mode Calculator</h1>
+
+        <div>
+            <label for="resistance1" class="block text-sm font-medium text-gray-700">Resistance (R1)</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="r1" id="resistance1" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="Enter R1 resistance">
+                <select v-model="r1_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                    <option value="1">Ω</option>
+                    <option value="1000">kΩ</option>
+                    <option value="1000000">MΩ</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="resistance2" class="block text-sm font-medium text-gray-700">Resistance (R2)</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="r2" id="resistance2" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="Enter R2 resistance">
+                <select v-model="r2_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                    <option value="1">Ω</option>
+                    <option value="1000">kΩ</option>
+                    <option value="1000000">MΩ</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="capacitance" class="block text-sm font-medium text-gray-700">Capacitance (C)</label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+                <input type="number" v-model.number="c" id="capacitance" class="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3" placeholder="Enter capacitance">
+                <select v-model="c_unit" class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
+                    <option value="0.000000000001">pF</option>
+                    <option value="0.000000001">nF</option>
+                    <option value="0.000001">µF</option>
+                    <option value="0.001">mF</option>
+                </select>
+            </div>
+        </div>
+
+        <div v-if="frequency" class="p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 space-y-2">
+            <p><span class="font-bold">Frequency (f):</span> {{ formattedFrequency }}</p>
+            <p><span class="font-bold">Duty Cycle:</span> {{ dutyCycle.toFixed(2) }}%</p>
+            <p><span class="font-bold">Time High (T_h):</span> {{ formatTime(timeHigh) }}</p>
+            <p><span class="font-bold">Time Low (T_l):</span> {{ formatTime(timeLow) }}</p>
+            <p><span class="font-bold">Period (T):</span> {{ formatTime(period) }}</p>
+        </div>
+
+        <div class="text-center text-gray-600 text-sm">
+            <p>T_h = 0.693 &times; (R1 + R2) &times; C</p>
+            <p>T_l = 0.693 &times; R2 &times; C</p>
+            <p>f = 1 / (T_h + T_l)</p>
+            <p>Duty Cycle = (T_h / (T_h + T_l)) &times; 100</p>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue
+
+        createApp({
+            setup() {
+                const r1 = ref(1);
+                const r1_unit = ref(1000); // kΩ
+                const r2 = ref(47);
+                const r2_unit = ref(1000); // kΩ
+                const c = ref(10);
+                const c_unit = ref(0.000001); // µF
+
+                const resistance1InOhms = computed(() => r1.value * r1_unit.value);
+                const resistance2InOhms = computed(() => r2.value * r2_unit.value);
+                const capacitanceInFarads = computed(() => c.value * c_unit.value);
+
+                const timeHigh = computed(() => {
+                    if (resistance1InOhms.value > 0 && resistance2InOhms.value > 0 && capacitanceInFarads.value > 0) {
+                        return 0.693 * (resistance1InOhms.value + resistance2InOhms.value) * capacitanceInFarads.value;
+                    }
+                    return 0;
+                });
+
+                const timeLow = computed(() => {
+                    if (resistance2InOhms.value > 0 && capacitanceInFarads.value > 0) {
+                        return 0.693 * resistance2InOhms.value * capacitanceInFarads.value;
+                    }
+                    return 0;
+                });
+
+                const period = computed(() => {
+                    return timeHigh.value + timeLow.value;
+                });
+
+                const frequency = computed(() => {
+                    if (period.value > 0) {
+                        return 1 / period.value;
+                    }
+                    return 0;
+                });
+
+                const formattedFrequency = computed(() => {
+                    const f = frequency.value;
+                    if (f === 0) return '0 Hz';
+                    if (f >= 1000000) return (f / 1000000).toFixed(2) + ' MHz';
+                    if (f >= 1000) return (f / 1000).toFixed(2) + ' kHz';
+                    return f.toFixed(2) + ' Hz';
+                });
+
+                const dutyCycle = computed(() => {
+                    if (period.value > 0) {
+                        return (timeHigh.value / period.value) * 100;
+                    }
+                    return 0;
+                });
+
+                const formatTime = (t) => {
+                    if (t === 0) return '0 s';
+                    if (t >= 31536000) return (t / 31536000).toFixed(2) + ' y';
+                    if (t >= 2592000) return (t / 2592000).toFixed(2) + ' mo';
+                    if (t >= 86400) return (t / 86400).toFixed(2) + ' d';
+                    if (t >= 3600) return (t / 3600).toFixed(2) + ' h';
+                    if (t >= 60) return (t / 60).toFixed(2) + ' m';
+                    if (t < 0.000001) return (t * 1000000000).toFixed(2) + ' ns';
+                    if (t < 0.001) return (t * 1000000).toFixed(2) + ' µs';
+                    if (t < 1) return (t * 1000).toFixed(2) + ' ms';
+                    return t.toFixed(2) + ' s';
+                };
+
+                return {
+                    r1,
+                    r1_unit,
+                    r2,
+                    r2_unit,
+                    c,
+                    c_unit,
+                    frequency,
+                    formattedFrequency,
+                    dutyCycle,
+                    timeHigh,
+                    timeLow,
+                    period,
+                    formatTime
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

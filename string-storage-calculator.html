@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Storage Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto mt-10 p-5 bg-white rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-center mb-5">String Storage Calculator</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div>
+                <label for="numStrings" class="block text-sm font-medium text-gray-700">Number of Strings</label>
+                <input type="number" id="numStrings" v-model.number="numStrings" @input="calculateStorage" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="avgStringLength" class="block text-sm font-medium text-gray-700">Average String Length (characters)</label>
+                <input type="number" id="avgStringLength" v-model.number="avgStringLength" @input="calculateStorage" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="bytesPerChar" class="block text-sm font-medium text-gray-700">Average Bytes per Character (e.g., 1 for ASCII/UTF-8, 2 for UTF-16)</label>
+                <input type="number" id="bytesPerChar" v-model.number="bytesPerChar" @input="calculateStorage" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+        </div>
+
+        <div class="mt-5 p-4 bg-gray-50 rounded-lg">
+            <h2 class="text-lg font-bold mb-2">Calculated Storage Size</h2>
+            <p>Total Bytes: <span class="font-mono">{{ totalBytes }}</span></p>
+            <p>Formatted Size: <span class="font-mono">{{ formattedSize }}</span></p>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                numStrings: 1000,
+                avgStringLength: 50,
+                bytesPerChar: 1, // Default to 1 byte per character (e.g., ASCII or basic UTF-8)
+                totalBytes: 0,
+            },
+            computed: {
+                formattedSize() {
+                    return this.formatBytes(this.totalBytes);
+                }
+            },
+            methods: {
+                calculateStorage() {
+                    const num = this.numStrings;
+                    const len = this.avgStringLength;
+                    const bytes = this.bytesPerChar;
+
+                    if (isNaN(num) || isNaN(len) || isNaN(bytes) || num < 0 || len < 0 || bytes <= 0) {
+                        this.totalBytes = 0;
+                        return;
+                    }
+
+                    this.totalBytes = num * len * bytes;
+                },
+                formatBytes(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                }
+            },
+            mounted() {
+                this.calculateStorage();
+            }
+        });
+    </script>
+</body>
+</html>

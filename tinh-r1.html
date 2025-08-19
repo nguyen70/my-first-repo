@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Series Resistor Calculator</title>
+</head>
+<body>
+    <h1>Calculate R1 in Series Circuit</h1>
+    <div>
+        <label for="u">Total Voltage (U) in volts:</label>
+        <input type="number" id="u" step="any">
+    </div>
+    <div>
+        <label for="u2">Voltage across R2 (U2) in volts:</label>
+        <input type="number" id="u2" step="any">
+    </div>
+    <div>
+        <label for="r2">Resistance R2 in ohms:</label>
+        <input type="number" id="r2" step="any">
+    </div>
+    <button onclick="calculateR1()">Calculate R1</button>
+    <div>
+        <h3>Result:</h3>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        function calculateR1() {
+            // Get input values
+            const u = parseFloat(document.getElementById('u').value);
+            const u2 = parseFloat(document.getElementById('u2').value);
+            const r2 = parseFloat(document.getElementById('r2').value);
+            
+            // Validate inputs
+            if (isNaN(u) || isNaN(u2) || isNaN(r2)) {
+                document.getElementById('result').textContent = "Please enter all values";
+                return;
+            }
+            
+            // Calculate U1 from U and U2
+            const u1 = u - u2;
+            
+            // Check if U1 is valid
+            if (u1 <= 0) {
+                document.getElementById('result').textContent = "Error: U2 must be less than U";
+                return;
+            }
+            
+            // Calculate R1 using the voltage divider principle: R1 = (U1 * R2) / U2
+            const r1 = (u1 * r2) / u2;
+            
+            // Display result
+            document.getElementById('result').textContent = 
+                `R1 = ${r1.toFixed(2)} ohms (U1 = ${u1.toFixed(2)}V)`;
+        }
+    </script>
+</body>
+</html>

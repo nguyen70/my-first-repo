@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltage-Time Interpolation Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
+    <div id="app" class="w-full max-w-2xl p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800">Voltage-Time Interpolation Calculator</h1>
+
+        <!-- Reference Points Section -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">Reference Data Points</h2>
+            <div v-for="(point, index) in referencePoints" :key="index" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div>
+                    <label :for="'volt' + index" class="block text-sm font-medium text-gray-600">Voltage {{ index + 1 }} (V)</label>
+                    <input type="number" v-model.number="point.v" :id="'volt' + index" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label :for="'time' + index" class="block text-sm font-medium text-gray-600">Time {{ index + 1 }} (e.g., 1m24s)</label>
+                    <input type="text" v-model="point.t" :id="'time' + index" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+        </div>
+
+        <!-- Derived Formula Display -->
+        <div v-if="polynomialCoefficients.valid" class="p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800">
+            <h3 class="font-semibold">Derived Formula (y = ax² + bx + c)</h3>
+            <p class="font-mono text-sm mt-1">
+                y = {{ polynomialCoefficients.a.toFixed(4) }}x² + {{ polynomialCoefficients.b.toFixed(4) }}x + {{ polynomialCoefficients.c.toFixed(4) }}
+            </p>
+        </div>
+         <div v-else class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+            <p class="font-semibold">Cannot derive a valid formula. Please check reference points.</p>
+        </div>
+
+
+        <!-- Prediction Section -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">Prediction</h2>
+            <div>
+                <label for="targetVoltage" class="block text-sm font-medium text-gray-600">Input Voltage to Predict Time (V)</label>
+                <input type="number" v-model.number="targetVoltage" id="targetVoltage" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+        </div>
+
+        <!-- Result Display -->
+        <div v-if="polynomialCoefficients.valid" class="p-4 bg-green-100 border-l-4 border-green-500 text-green-800">
+            <p class="font-bold">Predicted Time: <span class="font-mono text-lg">{{ formattedPredictedTime }}</span></p>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                // --- STATE ---
+                const referencePoints = ref([
+                    { v: 1, t: '0m20s' },
+                    { v: 2, t: '0m40s' },
+                    { v: 3, t: '0m60s' }
+                ]);
+                const targetVoltage = ref(8);
+
+                // --- HELPERS ---
+                const parseTimeToSeconds = (timeStr) => {
+                    if (!timeStr || typeof timeStr !== 'string') return 0;
+                    let totalSeconds = 0;
+                    const minMatch = timeStr.match(/(\d+)\s*m/);
+                    const secMatch = timeStr.match(/(\d+)\s*s/);
+                    if (minMatch) totalSeconds += parseInt(minMatch[1], 10) * 60;
+                    if (secMatch) totalSeconds += parseInt(secMatch[1], 10);
+                    return totalSeconds;
+                };
+
+                const formatSecondsToTime = (totalSeconds) => {
+                    if (isNaN(totalSeconds) || totalSeconds < 0) return "Invalid Time";
+                    const years = Math.floor(totalSeconds / 31536000);
+                    totalSeconds %= 31536000;
+                    const months = Math.floor(totalSeconds / 2592000);
+                    totalSeconds %= 2592000;
+                    const days = Math.floor(totalSeconds / 86400);
+                    totalSeconds %= 86400;
+                    const hours = Math.floor(totalSeconds / 3600);
+                    totalSeconds %= 3600;
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+
+                    let result = '';
+                    if (years > 0) result += `${years}y `;
+                    if (months > 0) result += `${months}mo `;
+                    if (days > 0) result += `${days}d `;
+                    if (hours > 0) result += `${hours}h `;
+                    if (minutes > 0) result += `${minutes}m `;
+                    if (seconds > 0 || result === '') result += `${seconds.toFixed(0)}s`;
+                    return result.trim();
+                };
+
+                // --- COMPUTED PROPERTIES ---
+                const parsedPoints = computed(() => {
+                    return referencePoints.value.map(p => ({
+                        x: p.v,
+                        y: parseTimeToSeconds(p.t)
+                    }));
+                });
+
+                const polynomialCoefficients = computed(() => {
+                    const points = parsedPoints.value;
+                    if (points.length !== 3) return { valid: false };
+                    
+                    const [p1, p2, p3] = points;
+
+                    // Using matrix method to solve for a, b, c in y = ax^2 + bx + c
+                    const x1 = p1.x, y1 = p1.y;
+                    const x2 = p2.x, y2 = p2.y;
+                    const x3 = p3.x, y3 = p3.y;
+
+                    const D = (x1 - x2) * (x1 - x3) * (x2 - x3);
+                    if (D === 0) return { valid: false, a: 0, b: 0, c: 0 }; // Points are collinear or not distinct X values
+
+                    const a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / D;
+                    const b = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / D;
+                    const c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / D;
+                    
+                    if (isNaN(a) || isNaN(b) || isNaN(c)) return { valid: false, a: 0, b: 0, c: 0 };
+
+                    return { valid: true, a, b, c };
+                });
+
+                const predictedTimeInSeconds = computed(() => {
+                    const coeffs = polynomialCoefficients.value;
+                    if (!coeffs.valid) return 0;
+
+                    const x = targetVoltage.value;
+                    const { a, b, c } = coeffs;
+                    
+                    return a * x * x + b * x + c;
+                });
+
+                const formattedPredictedTime = computed(() => {
+                    return formatSecondsToTime(predictedTimeInSeconds.value);
+                });
+
+                return {
+                    referencePoints,
+                    targetVoltage,
+                    polynomialCoefficients,
+                    formattedPredictedTime
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
