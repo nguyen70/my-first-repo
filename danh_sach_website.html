@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách website theo chuyên mục</title>
+    <meta http-equiv="refresh" content="86400" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thêm Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <section id="hengio">
+      <!-- Thêm audio element -->
+      <audio
+        id="beepSound"
+        src="https://assets.piliapp.com/s3pxy/timer/beep2.mp3"
+      ></audio>
+      <div class="timer text-6xl font-bold text-center text-gray-800 mb-8">
+        <span id="hours">00</span>: <span id="minutes">00</span>:
+        <span id="seconds">00</span>
+      </div>
+      <div class="controls flex flex-col items-center gap-4">
+        <div class="flex gap-2">
+          <input
+            type="number"
+            id="setHours"
+            placeholder="Giờ"
+            min="0"
+            max="23"
+            class="w-20 p-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="number"
+            id="setMinutes"
+            placeholder="Phút"
+            min="0"
+            max="59"
+            class="w-20 p-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="number"
+            id="setSeconds"
+            placeholder="Giây"
+            min="0"
+            max="59"
+            class="w-20 p-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Thêm input cho thời gian phát âm thanh -->
+        <div class="flex items-center gap-2">
+          <label class="text-gray-700">Thời gian báo:</label>
+          <input
+            type="number"
+            id="beepDuration"
+            placeholder="Giây"
+            min="1"
+            max="60"
+            value="10"
+            class="w-20 p-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span class="text-gray-700">giây</span>
+        </div>
+
+        <!-- Thêm các nút lựa chọn nhanh -->
+        <div
+          class="quick-select flex flex-wrap gap-2 justify-center max-w-2xl mb-4"
+        >
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="1"
+          >
+            1p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="3"
+          >
+            3p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="5"
+          >
+            5p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="7"
+          >
+            7p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="10"
+          >
+            10p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="15"
+          >
+            15p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="20"
+          >
+            20p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="30"
+          >
+            30p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="40"
+          >
+            40p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="50"
+          >
+            50p
+          </button>
+          <button
+            class="quick-time bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-lg text-sm transition-colors"
+            data-minutes="60"
+          >
+            60p
+          </button>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            id="startTimer"
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            Bắt đầu
+          </button>
+          <button
+            id="pauseTimer"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            Tạm dừng
+          </button>
+          <button
+            id="resetTimer"
+            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            Đặt lại
+          </button>
+        </div>
+      </div>
+
+      <script>
+        $(document).ready(function () {
+          let timer;
+          let isRunning = false;
+          let totalSeconds = 0;
+          let beepTimer; // Timer cho âm thanh
+
+          function updateDisplay() {
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+
+            let timeString = `${hours.toString().padStart(2, "0")}:${minutes
+              .toString()
+              .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+            $("#hours").text(hours.toString().padStart(2, "0"));
+            $("#minutes").text(minutes.toString().padStart(2, "0"));
+            $("#seconds").text(seconds.toString().padStart(2, "0"));
+
+            // Cập nhật title
+            document.title = isRunning
+              ? `${timeString} - Đồng hồ hẹn giờ`
+              : "Đồng hồ hẹn giờ";
+          }
+
+          function startTimer() {
+            if (!isRunning) {
+              isRunning = true;
+              timer = setInterval(function () {
+                if (totalSeconds > 0) {
+                  totalSeconds--;
+                  updateDisplay();
+                } else {
+                  clearInterval(timer);
+                  isRunning = false;
+
+                  // Lấy thời gian phát âm thanh từ input
+                  const beepDuration = parseInt($("#beepDuration").val()) || 10;
+                  const beepSound = document.getElementById("beepSound");
+                  beepSound.play();
+                  let beepCount = 0;
+                  beepTimer = setInterval(function () {
+                    beepCount++;
+                    if (beepCount < beepDuration) {
+                      beepSound.currentTime = 0;
+                      beepSound.play();
+                    } else {
+                      clearInterval(beepTimer);
+                    }
+                  }, 1000);
+                }
+              }, 1000);
+            }
+          }
+
+          $("#startTimer").click(function () {
+            if (!isRunning) {
+              let hours = parseInt($("#setHours").val()) || 0;
+              let minutes = parseInt($("#setMinutes").val()) || 0;
+              let seconds = parseInt($("#setSeconds").val()) || 0;
+              totalSeconds = hours * 3600 + minutes * 60 + seconds;
+              updateDisplay();
+              startTimer();
+            }
+          });
+
+          $("#pauseTimer").click(function () {
+            clearInterval(timer);
+            isRunning = false;
+          });
+
+          $("#resetTimer").click(function () {
+            clearInterval(timer);
+            clearInterval(beepTimer);
+            document.getElementById("beepSound").pause();
+            isRunning = false;
+            totalSeconds = 0;
+            updateDisplay();
+            $("#setHours, #setMinutes, #setSeconds").val("");
+          });
+
+          // Thêm xử lý cho các nút lựa chọn nhanh
+          $(".quick-time").click(function () {
+            let minutes = parseInt($(this).data("minutes"));
+            $("#setHours").val(0);
+            $("#setMinutes").val(minutes);
+            $("#setSeconds").val(0);
+
+            totalSeconds = minutes * 60;
+            updateDisplay();
+            startTimer();
+          });
+        });
+      </script>
+    </section>
+    <section id="theodoivisa" class="">
+      <div class="container mx-auto px-4 py-8">
+        <button
+          id="toggleVisand"
+          class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg mb-4"
+        >
+          Ẩn/Hiện Visand
+        </button>
+        <a
+          href="https://docs.google.com/spreadsheets/d/13eC1bu2BjSL3qOOBHXZhNPNqkbaGoVI0/edit?gid=498216962#gid=498216962"
+          target="_blank"
+          class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg mb-4"
+        >
+          Sửa Visand
+        </a>
+        <div id="visand">
+          <iframe
+            style="width: 100%; height: 700px"
+            class="hidden2"
+            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTQBPk89E3KpZGmuF5pISFaG74kjXMitr1ihTJULOJlGHrgnSs-SLUtpXT9tKWtVA/pubhtml?widget=true&amp;headers=false"
+          ></iframe>
+          <!-- <iframe style="width: 100%; height: 600px"
+          class="hidden2" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTQBPk89E3KpZGmuF5pISFaG74kjXMitr1ihTJULOJlGHrgnSs-SLUtpXT9tKWtVA/pubhtml?widget=true&amp;headers=false"></iframe> -->
+        </div>
+      </div>
+    </section>
+    <section class="embed1 hidden">
+      <iframe
+        src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FMCV.OfflineBanMuonHenHo%2Fposts%2Fpfbid0MehqKGWKXpk38NceSdUmKg8DMMtonYXzf5XPXm5LMhrQdZndhtzs4ehueEdfyo5ul&show_text=true&width=500"
+        width="500"
+        height="668"
+        style="border: none; overflow: hidden"
+        scrolling="no"
+        frameborder="0"
+        allowfullscreen="true"
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+      ></iframe>
+      <iframe
+        src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid01GBHk1skz313v1XgqMiRwcxp9csRTPTzD8MJ6zPMkra5VhPbCtGUzmTvwAUeMqQUl%26id%3D100059397288531&show_text=true&width=500"
+        width="500"
+        height="512"
+        style="border: none; overflow: hidden"
+        scrolling="no"
+        frameborder="0"
+        allowfullscreen="true"
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+      ></iframe>
+      <iframe
+        src="https://truthsocial.com/@kmcpatriot/114319250131701895/embed"
+        class="truthsocial-embed"
+        style="max-width: 100%; border: 0"
+        width="600"
+        allowfullscreen="allowfullscreen"
+      ></iframe>
+      <script src="https://truthsocial.com/embed.js" async="async"></script>
+      <iframe
+        src="https://truthsocial.com/@realDonaldTrump/114268668984265677/embed"
+        class="truthsocial-embed truthsocial-video"
+        style="max-width: 100%; border: 0"
+        width="600"
+        height="auto"
+        allowfullscreen="allowfullscreen"
+      ></iframe>
+      <script src="https://truthsocial.com/embed.js" async="async"></script>
+    </section>
+    <div id="app" class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold text-center mb-8">
+        Danh sách Website theo chuyên mục
+      </h1>
+      <!-- Google sheet -->
+      <div class="mb-4">
+        <div class="mb-4 overflow-hidden rounded-lg shadow-md bg-white">
+          <button
+            class="accordion-header flex justify-between items-center w-full p-4 text-left font-medium hover:bg-gray-50 transition"
+          >
+            <span>Google sheet</span>
+            <svg
+              class="w-5 h-5 transform transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div class="accordion-content hidden p-4 border-t border-gray-200">
+            <iframe
+              style="width: 100%; height: 600px"
+              class="hidden2"
+              src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTQBPk89E3KpZGmuF5pISFaG74kjXMitr1ihTJULOJlGHrgnSs-SLUtpXT9tKWtVA/pubhtml?widget=true&amp;headers=false"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danh sách tất cả các website dịch vụ của Google -->
+      <div class="mb-4">
+        <div class="mb-4 overflow-hidden rounded-lg shadow-md bg-white">
+          <button
+            class="accordion-header flex justify-between items-center w-full p-4 text-left font-medium hover:bg-gray-50 transition"
+          >
+            <span>Dịch vụ Google</span>
+            <svg
+              class="w-5 h-5 transform transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div class="accordion-content hidden p-4 border-t border-gray-200">
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              <div
+                v-for="(site,index) in googleServices"
+                :key="site.name"
+                class="bg-white p-4 rounded-lg shadow"
+              >
+                <h3 class="font-medium mb-2">
+                  <span class="text-red-500 font-bold">{{index}}.</span> {{
+                  site.name }}
+                </h3>
+                <p class="text-gray-600 mb-2">{{ site.description }}</p>
+                <a
+                  :href="site.url"
+                  target="_blank"
+                  class="text-red-500 hover:underline"
+                  >Truy cập</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyên mục Công nghệ -->
+      <div class="mb-4">
+        <div class="mb-4 overflow-hidden rounded-lg shadow-md bg-white">
+          <button
+            class="accordion-header flex justify-between items-center w-full p-4 text-left font-medium hover:bg-gray-50 transition"
+          >
+            <span>Công nghệ</span>
+            <svg
+              class="w-5 h-5 transform transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div class="accordion-content hidden p-4 border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="(site, index) in techSites"
+                :key="site.name"
+                class="bg-white p-4 rounded-lg shadow"
+              >
+                <h3 class="font-medium mb-2">
+                  <span class="text-red-500 font-bold">{{index}}.</span> {{
+                  site.name }}
+                </h3>
+                <p class="text-gray-600 mb-2">{{ site.description }}</p>
+                <a
+                  :href="site.url"
+                  target="_blank"
+                  class="text-blue-500 hover:underline"
+                  >Truy cập</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyên mục Giáo dục -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4 text-green-600">Giáo dục</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="site in educationSites"
+            :key="site.name"
+            class="bg-white p-4 rounded-lg shadow"
+          >
+            <h3 class="font-medium mb-2">{{ site.name }}</h3>
+            <p class="text-gray-600 mb-2">{{ site.description }}</p>
+            <a
+              :href="site.url"
+              target="_blank"
+              class="text-green-500 hover:underline"
+              >Truy cập</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyên mục Giải trí -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4 text-purple-600">Giải trí</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="site in entertainmentSites"
+            :key="site.name"
+            class="bg-white p-4 rounded-lg shadow"
+          >
+            <h3 class="font-medium mb-2">{{ site.name }}</h3>
+            <p class="text-gray-600 mb-2">{{ site.description }}</p>
+            <a
+              :href="site.url"
+              target="_blank"
+              class="text-purple-500 hover:underline"
+              >Truy cập</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- hien thi gio dem nguoc -->
+      <div
+        id="countdown"
+        class="text-center my-8 p-6 bg-white rounded-lg shadow mx-auto max-w-md"
+      >
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+          Đồng hồ đếm ngược
+        </h2>
+        <div class="text-4xl font-bold text-red-600 mb-4">
+          {{ displayTime }}
+        </div>
+        <div class="flex justify-center space-x-4">
+          <input
+            v-model="minutes"
+            type="number"
+            min="0"
+            max="60"
+            class="w-20 p-2 border rounded"
+            placeholder="Phút"
+          />
+          <input
+            v-model="seconds"
+            type="number"
+            min="0"
+            max="59"
+            class="w-20 p-2 border rounded"
+            placeholder="Giây"
+          />
+        </div>
+        <div class="mt-4 flex justify-center space-x-4">
+          <button
+            @click="startTimer"
+            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Bắt đầu
+          </button>
+          <button
+            @click="pauseTimer"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
+          >
+            Tạm dừng
+          </button>
+          <button
+            @click="resetTimer"
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Đặt lại
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            // Dữ liệu đồng hồ đếm ngược
+            minutes: 5,
+            seconds: 0,
+            totalSeconds: 300,
+            timer: null,
+            isRunning: false,
+            displayTime: "05:00",
+
+            googleServices: [
+              {
+                name: "Google Gemini",
+                description: "Nền tảng quảng cáo trực tuyến của Google",
+                url: "https://gemini.google.com/app",
+              },
+              {
+                name: "Google Dịch",
+                description:
+                  "Công cụ dịch thuật đa ngôn ngữ miễn phí của Google",
+                url: "https://translate.google.com",
+              },
+              {
+                name: "Google Search",
+                description: "Công cụ tìm kiếm phổ biến nhất thế giới",
+                url: "https://google.com",
+              },
+              {
+                name: "Gmail",
+                description: "Dịch vụ email miễn phí của Google",
+                url: "https://mail.google.com",
+              },
+              {
+                name: "Google Drive",
+                description: "Lưu trữ và chia sẻ tập tin trực tuyến",
+                url: "https://drive.google.com",
+              },
+              {
+                name: "Google Maps",
+                description: "Bản đồ và chỉ đường trực tuyến",
+                url: "https://maps.google.com",
+              },
+              {
+                name: "YouTube",
+                description: "Nền tảng chia sẻ video lớn nhất thế giới",
+                url: "https://youtube.com",
+              },
+              {
+                name: "Google Photos",
+                description: "Lưu trữ và chia sẻ hình ảnh trực tuyến",
+                url: "https://photos.google.com",
+              },
+              {
+                name: "Google Meet",
+                description: "Dịch vụ họp trực tuyến và hội nghị video",
+                url: "https://meet.google.com",
+              },
+              {
+                name: "Google Calendar",
+                description: "Lịch trực tuyến và quản lý thời gian",
+                url: "https://calendar.google.com",
+              },
+              {
+                name: "Google Docs",
+                description: "Soạn thảo văn bản trực tuyến",
+                url: "https://docs.google.com",
+              },
+              {
+                name: "Google Sheets",
+                description: "Bảng tính trực tuyến",
+                url: "https://sheets.google.com",
+              },
+              {
+                name: "Google Slides",
+                description: "Trình chiếu trực tuyến",
+                url: "https://slides.google.com",
+              },
+              {
+                name: "Google Forms",
+                description: "Tạo biểu mẫu và khảo sát trực tuyến",
+                url: "https://forms.google.com",
+              },
+              {
+                name: "Google Keep",
+                description: "Ghi chú và danh sách công việc",
+                url: "https://keep.google.com",
+              },
+              {
+                name: "Google Classroom",
+                description: "Nền tảng học tập trực tuyến",
+                url: "https://classroom.google.com",
+              },
+              {
+                name: "Google Scholar",
+                description: "Tìm kiếm tài liệu học thuật",
+                url: "https://scholar.google.com",
+              },
+              {
+                name: "Google News",
+                description: "Tin tức từ nhiều nguồn khác nhau",
+                url: "https://news.google.com",
+              },
+              {
+                name: "Google Play",
+                description: "Cửa hàng ứng dụng và nội dung số",
+                url: "https://play.google.com",
+              },
+              {
+                name: "Google Earth",
+                description: "Khám phá thế giới qua bản đồ 3D",
+                url: "https://earth.google.com",
+              },
+            ],
+            techSites: [
+              {
+                name: "Mermaid",
+                description: "Công cụ vẽ sơ đồ trực tuyến",
+                url: "https://mermaid.live/",
+              },
+              {
+                name: "Perplexity.ai",
+                description: "Công cụ AI cho các ứng dụng khác nhau",
+                url: "https://www.perplexity.ai/",
+              },
+              {
+                name: "FutureTools.io",
+                description: "Tổng hợp các công cụ AI mới nhất",
+                url: "https://www.futuretools.io/",
+              },
+              {
+                name: "There’s An AI For That",
+                description: "Cơ sở dữ liệu khổng lồ các công cụ AI",
+                url: "https://theresanaiforthat.com/",
+              },
+              {
+                name: "AI Tools Directory",
+                description: "Danh sách công cụ AI được phân loại",
+                url: "https://www.aitoolsdirectory.com/",
+              },
+              {
+                name: "Product Hunt – AI Section",
+                description: "Nơi cộng đồng upvote các công cụ AI",
+                url: "https://www.producthunt.com/topics/ai",
+              },
+              {
+                name: "Futurepedia",
+                description: "Cập nhật hàng ngày các công cụ AI mới",
+                url: "https://www.futurepedia.io/",
+              },
+              {
+                name: "TopAI.tools",
+                description: "Hơn 3.000+ công cụ AI được liệt kê",
+                url: "https://topai.tools/",
+              },
+              {
+                name: "AI Valley",
+                description: "Cộng đồng chia sẻ và đánh giá các công cụ AI",
+                url: "https://aivalley.ai/",
+              },
+              {
+                name: "SaaS AI Tools (by Stork)",
+                description:
+                  "Tập trung vào các công cụ AI dành cho doanh nghiệp",
+                url: "https://stork.ai/saas-ai-tools",
+              },
+              {
+                name: "Gemini",
+                description: "Quản lý quảng cáo Google",
+                url: "https://gemini.google.com/app",
+              },
+              {
+                name: "Microsoft Copilot",
+                description: "Trợ lý phát triển phần mềm",
+                url: "https://copilot.microsoft.com/chats/B9a6jCGAuLr7cR3VsFrAf",
+              },
+              {
+                name: "ChatGPT",
+                description: "Trợ lý ảo thông minh",
+                url: "https://chatgpt.com/?model=auto",
+              },
+              {
+                name: "FSave",
+                description: "Tải xuống video trực tuyến",
+                url: "https://fsave.net/en",
+              },
+              {
+                name: "Nhà Thuốc Long Châu",
+                description: "Nhà thuốc trực tuyến",
+                url: "https://nhathuoclongchau.com.vn/",
+              },
+              {
+                name: "DeepSeek Chat",
+                description: "Chat trực tuyến cho các chuyên gia",
+                url: "https://chat.deepseek.com",
+              },
+              {
+                name: "Supabase",
+                description: "Nền tảng phát triển ứng dụng nhanh chóng",
+                url: "https://supabase.com",
+              },
+              {
+                name: "n8n",
+                description: "Nền tảng quản lý quy trình làm việc tự động",
+                url: "https://n8n.io/",
+              },
+              {
+                name: "Tutorialspoint",
+                description: "Nền tảng học tập trực tuyến",
+                url: "https://www.tutorialspoint.com/",
+              },
+              {
+                name: "OneCompiler",
+                description: "Môi trường phát triển tích hợp trực tuyến",
+                url: "https://onecompiler.com/",
+              },
+              {
+                name: "Zalo chat",
+                description: "zalo chat web",
+                url: "https://chat.zalo.me/",
+              },
+              {
+                name: "Google Dịch",
+                description:
+                  "Công cụ dịch thuật đa ngôn ngữ miễn phí của Google",
+                url: "https://translate.google.com",
+              },
+              {
+                name: "Gmail",
+                description: "Dịch vụ email miễn phí của Google",
+                url: "https://mail.google.com",
+              },
+              {
+                name: "Google Drive",
+                description:
+                  "Dịch vụ lưu trữ và chia sẻ tập tin trực tuyến của Google",
+                url: "https://drive.google.com",
+              },
+              {
+                name: "Facebook",
+                description: "Mạng xã hội phổ biến nhất thế giới",
+                url: "https://facebook.com",
+              },
+              {
+                name: "Hẹn giờ",
+                description: "Công cụ hẹn giờ và quản lý thời gian",
+                url: "file:///S:/xampp/htdocs/bdsthue/config/hengio.html",
+              },
+            ],
+            educationSites: [
+              {
+                name: "Tạo Tem Chống Giả Điện Tử",
+                description: "Công cụ tạo tem chống giả điện tử",
+                url: "file:///C:/nguyen/workspace/gemini-website/text-to-qr.html",
+              },
+              {
+                name: "Mua đất xây ảnh phòng trọ",
+                description:
+                  "Công cụ phân tích đầu tư mua đất xây ảnh phòng trọ",
+                url: "file:///C:/nguyen/workspace/gemini-website/mua-dat-xay-apt.html",
+              },
+              {
+                name: "Công cụ Phân tích Đầu tư Trồng Gấc",
+                description: "Công cụ phân tích và dự đoán lợi nhuận trồng gấc",
+                url: "file:///C:/nguyen/workspace/gemini-website/trong-gac.html",
+              },
+              {
+                name: "Shopee Affiliate",
+                description: "Nền tảng liên kết của Shopee",
+                url: "https://affiliate.shopee.vn/dashboard",
+              },
+              {
+                name: "TTYT Thi Xa Trang Bang",
+                description:
+                  "Thông tin về giá và danh mục dịch vụ kỹ thuật tại TTYT Thi Xa Trang Bang năm 2025",
+                url: "https://ttytthixatrangbang.ytetayninh.vn/chi-tiet-bai-viet/-/view/5433860/bang-gia-danh-muc-dvkt-tai-ttyt-thi-xa-trang-bang-nam-2025_5770232",
+              },
+              {
+                name: "Học trực tuyến",
+                description: "Nền tảng học tập trực tuyến",
+                url: "#",
+              },
+            ],
+            entertainmentSites: [
+              {
+                name: "Netflix Việt Nam",
+                description: "Nền tảng xem phim trực tuyến",
+                url: "https://netflix.com",
+              },
+            ],
+          };
+        },
+        methods: {
+          startTimer() {
+            console.log("startTimer");
+            if (!this.isRunning) {
+              // Nếu đồng hồ đã hết giờ hoặc chưa được thiết lập
+              if (this.totalSeconds <= 0) {
+                this.totalSeconds =
+                  parseInt(this.minutes) * 60 + parseInt(this.seconds || 0);
+                this.updateDisplayTime();
+              }
+
+              this.isRunning = true;
+              this.timer = setInterval(() => {
+                if (this.totalSeconds > 0) {
+                  this.totalSeconds--;
+                  this.updateDisplayTime();
+                } else {
+                  this.pauseTimer();
+                  // Phát âm thanh beep khi hết giờ
+                  if (this.totalSeconds === 0) {
+                    // Tạo âm thanh beep
+                    let sound1 = new Audio(
+                      "https://cdn.pixabay.com/download/audio/2024/09/29/audio_5c67567261.mp3?filename=relaxing-guitar-loop-v5-245859.mp3"
+                    );
+                    let sound2 = new Audio(
+                      "https://cdn.pixabay.com/download/audio/2024/02/08/audio_4a3acb3888.mp3?filename=marie-louise-janneman-acoustic-piano-loop-190241.mp3"
+                    );
+
+                    // Phát âm thanh beep 2 lần
+                    // Lặp lại âm thanh 10 lần
+                    sound1.play();
+
+                    console.log("Beep beep! Hết giờ!");
+                  }
+                }
+              }, 1000);
+            }
+          },
+          pauseTimer() {
+            this.isRunning = false;
+            clearInterval(this.timer);
+          },
+          resetTimer() {
+            this.pauseTimer();
+            this.totalSeconds =
+              parseInt(this.minutes) * 60 + parseInt(this.seconds || 0);
+            this.updateDisplayTime();
+          },
+          updateDisplayTime() {
+            const mins = Math.floor(this.totalSeconds / 60);
+            const secs = this.totalSeconds % 60;
+            this.displayTime = `${mins.toString().padStart(2, "0")}:${secs
+              .toString()
+              .padStart(2, "0")}`;
+          },
+        },
+        mounted() {
+          this.totalSeconds =
+            parseInt(this.minutes) * 60 + parseInt(this.seconds || 0);
+          this.updateDisplayTime();
+        },
+      }).mount("#app");
+    </script>
+    <script>
+      document.querySelectorAll(".accordion-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          const content = header.nextElementSibling;
+          const icon = header.querySelector("svg");
+
+          // Toggle content visibility
+          content.classList.toggle("hidden");
+
+          // Rotate icon
+          icon.classList.toggle("rotate-180");
+
+          // Close other open accordion items (optional)
+          document.querySelectorAll(".accordion-content").forEach((item) => {
+            if (item !== content && !item.classList.contains("hidden")) {
+              item.classList.add("hidden");
+              item.previousElementSibling
+                .querySelector("svg")
+                .classList.remove("rotate-180");
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+      $("#toggleVisand").click(function () {
+        $("#visand").toggle(); // Ẩn/hiện phần visand
+      });
+    </script>
+  </body>
+</html>

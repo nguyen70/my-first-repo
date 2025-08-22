@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính C cho Mạch Dao Động LM358</title>
+</head>
+<body>
+    <h1>Công cụ Tính toán Tụ điện C</h1>
+    <p>Nhập các giá trị R1, R2, R3 và tần số f để tìm giá trị của tụ điện C.</p>
+
+    <div>
+        <label for="r1">Điện trở R1 (kΩ):</label>
+        <input type="number" id="r1" value="27">
+    </div>
+    <br>
+
+    <div>
+        <label for="r2">Điện trở R2 (kΩ):</label>
+        <input type="number" id="r2" value="27">
+    </div>
+    <br>
+
+    <div>
+        <label for="r3">Điện trở R3 (kΩ):</label>
+        <input type="number" id="r3" value="10">
+    </div>
+    <br>
+
+    <div>
+        <label for="f">Tần số f (Hz):</label>
+        <input type="number" id="f" value="4">
+    </div>
+    <br>
+
+    <div>
+        <label for="vcc">Điện áp Vcc (V):</label>
+        <input type="number" id="vcc" value="12">
+    </div>
+    <br>
+
+    <button id="calculateBtn">Tính toán</button>
+
+    <div id="result"></div>
+
+    <p style="font-size: 0.9em; color: #666;">
+        *Lưu ý: Giá trị Vcc không được sử dụng trong công thức tính tần số.
+    </p>
+
+    <script>
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            // Lấy giá trị từ các ô input
+            const r1 = parseFloat(document.getElementById('r1').value) * 1000; // Đổi kΩ sang Ω
+            const r2 = parseFloat(document.getElementById('r2').value) * 1000; // Đổi kΩ sang Ω
+            const r3 = parseFloat(document.getElementById('r3').value) * 1000; // Đổi kΩ sang Ω
+            const f = parseFloat(document.getElementById('f').value); // f ở Hz
+
+            const resultDiv = document.getElementById('result');
+
+            // Kiểm tra đầu vào hợp lệ
+            if (isNaN(r1) || isNaN(r2) || isNaN(r3) || isNaN(f) || f <= 0 || r1 <= 0 || r2 <= 0 || r3 <= 0) {
+                resultDiv.innerHTML = 'Vui lòng nhập các giá trị hợp lệ (lớn hơn 0).';
+                return;
+            }
+
+            // Tính toán biểu thức ln
+            const lnTerm = Math.log(1 + (2 * r2 / r1));
+
+            // Công thức tính C: C = 1 / (2 * R3 * f * ln(1 + 2*R2/R1))
+            const c_farads = 1 / (2 * r3 * f * lnTerm);
+
+            // Chuyển đổi sang đơn vị dễ đọc hơn
+            let c_display;
+            let unit;
+
+            if (c_farads >= 1e-6) {
+                c_display = c_farads * 1e6; // microFarad
+                unit = 'µF';
+            } else if (c_farads >= 1e-9) {
+                c_display = c_farads * 1e9; // nanoFarad
+                unit = 'nF';
+            } else {
+                c_display = c_farads * 1e12; // picoFarad
+                unit = 'pF';
+            }
+
+            // Hiển thị kết quả
+            resultDiv.innerHTML = `<br><p>Giá trị của Tụ điện C là:</p>
+                                <strong>${c_display.toFixed(2)} ${unit}</strong>`;
+        });
+    </script>
+</body>
+</html>
