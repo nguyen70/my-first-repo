@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Click Mouse Test (US Version)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .click-area {
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        .click-area:active {
+            transform: scale(0.98);
+        }
+        .single-click {
+            background-color: #3b82f6;
+        }
+        .double-click {
+            background-color: #10b981;
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: black;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+        .flag-background {
+            background: linear-gradient(to bottom, 
+                #b22234 0%, #b22234 15%, 
+                white 15%, white 30%, 
+                #b22234 30%, #b22234 45%, 
+                white 45%, white 60%, 
+                #b22234 60%, #b22234 75%, 
+                white 75%, white 90%, 
+                #b22234 90%, #b22234 100%);
+        }
+        .flag-background::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30%;
+            height: 54%;
+            background-color: #3c3b6e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30%;
+            height: 54%;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            padding: 5%;
+        }
+        .star {
+            color: white;
+            font-size: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-2">Double Click Mouse Test</h1>
+            <p class="text-gray-600">Test and improve your double click speed (US Version)</p>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <!-- Click Area -->
+            <div class="relative p-4 bg-gray-50 border-b">
+                <div id="clickArea" class="click-area flag-background rounded-lg h-64 md:h-80 flex flex-col items-center justify-center cursor-pointer relative">
+                    <div class="stars">
+                        <!-- Row 1 -->
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        
+                        <!-- Row 2 -->
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        
+                        <!-- Row 3 -->
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        
+                        <!-- Row 4 -->
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                        <div class="star"><i class="fas fa-star"></i></div>
+                        <div class="star"></div>
+                    </div>
+                    <i class="fas fa-mouse text-4xl md:text-5xl text-white mb-4 z-10"></i>
+                    <p class="text-xl md:text-2xl font-semibold text-white z-10">Click or Double Click Here</p>
+                    <p class="text-white mt-2 z-10">Double click threshold: <span id="doubleClickThreshold">100</span>ms</p>
+                </div>
+                
+                <!-- Click Indicator -->
+                <div id="clickIndicator" class="absolute hidden w-24 h-24 rounded-full bg-blue-400 opacity-0 pointer-events-none"></div>
+            </div>
+
+            <!-- Stats & Controls -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Stats -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Statistics</h2>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total clicks:</span>
+                                <span id="totalClicks" class="font-medium">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Single clicks:</span>
+                                <span id="singleClicks" class="font-medium text-blue-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Double clicks:</span>
+                                <span id="doubleClicks" class="font-medium text-green-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Double click speed (ms):</span>
+                                <span id="clickSpeed" class="font-medium">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Fastest double click (ms):</span>
+                                <span id="fastestClick" class="font-medium">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Settings</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="thresholdSlider" class="block text-gray-700 mb-2">Double click threshold (ms): <span id="thresholdValue">100</span></label>
+                                <input id="thresholdSlider" type="range" min="50" max="500" step="50" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>Faster</span>
+                                    <span>Slower</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="clickSound" class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input id="clickSound" type="checkbox" class="sr-only" checked>
+                                        <div class="block bg-gray-300 w-10 h-6 rounded-full"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                                    </div>
+                                    <div class="ml-3 text-gray-700">Enable click sound</div>
+                                </label>
+                            </div>
+                            <button id="resetStats" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg flex items-center">
+                                <i class="fas fa-redo-alt mr-2"></i> Reset Statistics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bars -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Click Ratio</h2>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <span class="text-gray-600 w-32">Single clicks:</span>
+                            <div class="h-4 bg-gray-200 rounded-full flex-grow">
+                                <div id="singleClickBar" class="h-full bg-blue-500 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span id="singleClickPercent" class="ml-2 text-gray-600 w-12">0%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-gray-600 w-32">Double clicks:</span>
+                            <div class="h-4 bg-gray-200 rounded-full flex-grow">
+                                <div id="doubleClickBar" class="h-full bg-green-500 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span id="doubleClickPercent" class="ml-2 text-gray-600 w-12">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">Instructions:</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-1">
+                        <li>Click or double click in the blue area above</li>
+                        <li>Double click is two clicks performed in a short time (default 100ms)</li>
+                        <li>Adjust the slider to change double click sensitivity</li>
+                        <li>Monitor your statistics and improve your double click speed</li>
+                        <li>User-select is disabled in the click area for accurate testing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-500 text-sm mt-8">
+            <p>Double Click Mouse Test Application | Designed with Tailwind CSS | US Version</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const clickArea = document.getElementById('clickArea');
+            const clickIndicator = document.getElementById('clickIndicator');
+            const totalClicksElement = document.getElementById('totalClicks');
+            const singleClicksElement = document.getElementById('singleClicks');
+            const doubleClicksElement = document.getElementById('doubleClicks');
+            const clickSpeedElement = document.getElementById('clickSpeed');
+            const fastestClickElement = document.getElementById('fastestClick');
+            const thresholdSlider = document.getElementById('thresholdSlider');
+            const thresholdValue = document.getElementById('thresholdValue');
+            const doubleClickThreshold = document.getElementById('doubleClickThreshold');
+            const resetStatsButton = document.getElementById('resetStats');
+            const clickSound = document.getElementById('clickSound');
+            const singleClickBar = document.getElementById('singleClickBar');
+            const doubleClickBar = document.getElementById('doubleClickBar');
+            const singleClickPercent = document.getElementById('singleClickPercent');
+            const doubleClickPercent = document.getElementById('doubleClickPercent');
+            
+            // Variables
+            let clickCount = 0;
+            let singleClickCount = 0;
+            let doubleClickCount = 0;
+            let lastClickTime = 0;
+            let fastestDoubleClick = 0;
+            let threshold = 100; // Default 100ms for US version
+            
+            // Audio context for click sounds
+            let audioContext;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API is not supported in this browser');
+            }
+            
+            // Play click sound
+            function playClickSound(frequency = 800, duration = 0.1) {
+                if (!clickSound.checked || !audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = 0.3;
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
+                
+                oscillator.stop(audioContext.currentTime + duration);
+            }
+            
+            // Show click indicator
+            function showClickIndicator(x, y, isDoubleClick = false) {
+                clickIndicator.style.left = `${x - 48}px`;
+                clickIndicator.style.top = `${y - 48}px`;
+                clickIndicator.style.backgroundColor = isDoubleClick ? '#10b981' : '#3b82f6';
+                clickIndicator.classList.remove('hidden');
+                clickIndicator.classList.remove('fade-out');
+                
+                // Trigger reflow
+                void clickIndicator.offsetWidth;
+                
+                clickIndicator.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    clickIndicator.classList.add('hidden');
+                }, 500);
+            }
+            
+            // Update progress bars
+            function updateProgressBars() {
+                const total = singleClickCount + doubleClickCount;
+                if (total === 0) {
+                    singleClickBar.style.width = '0%';
+                    doubleClickBar.style.width = '0%';
+                    singleClickPercent.textContent = '0%';
+                    doubleClickPercent.textContent = '0%';
+                    return;
+                }
+                
+                const singleClickPercentage = (singleClickCount / total) * 100;
+                const doubleClickPercentage = (doubleClickCount / total) * 100;
+                
+                singleClickBar.style.width = `${singleClickPercentage}%`;
+                doubleClickBar.style.width = `${doubleClickPercentage}%`;
+                
+                singleClickPercent.textContent = `${Math.round(singleClickPercentage)}%`;
+                doubleClickPercent.textContent = `${Math.round(doubleClickPercentage)}%`;
+            }
+            
+            // Handle click events
+            clickArea.addEventListener('click', function(e) {
+                clickCount++;
+                totalClicksElement.textContent = clickCount;
+                
+                const currentTime = new Date().getTime();
+                const timeSinceLastClick = currentTime - lastClickTime;
+                
+                // Show click indicator
+                showClickIndicator(e.clientX, e.clientY, false);
+                
+                // Check if it's a double click
+                if (timeSinceLastClick > 0 && timeSinceLastClick < threshold) {
+                    // It's a double click
+                    doubleClickCount++;
+                    doubleClicksElement.textContent = doubleClickCount;
+                    clickSpeedElement.textContent = timeSinceLastClick;
+                    
+                    // Update fastest double click
+                    if (fastestDoubleClick === 0 || timeSinceLastClick < fastestDoubleClick) {
+                        fastestDoubleClick = timeSinceLastClick;
+                        fastestClickElement.textContent = fastestDoubleClick;
+                    }
+                    
+                    // Visual feedback for double click
+                    clickArea.classList.remove('single-click');
+                    clickArea.classList.add('double-click');
+                    setTimeout(() => {
+                        clickArea.classList.remove('double-click');
+                    }, 300);
+                    
+                    // Play double click sound
+                    playClickSound(600, 0.15);
+                    
+                    // Show double click indicator
+                    showClickIndicator(e.clientX, e.clientY, true);
+                } else {
+                    // It's a single click
+                    singleClickCount++;
+                    singleClicksElement.textContent = singleClickCount;
+                    
+                    // Visual feedback for single click
+                    clickArea.classList.add('single-click');
+                    setTimeout(() => {
+                        clickArea.classList.remove('single-click');
+                    }, 300);
+                    
+                    // Play single click sound
+                    playClickSound(400, 0.1);
+                }
+                
+                lastClickTime = currentTime;
+                updateProgressBars();
+            });
+            
+            // Update threshold value from slider
+            thresholdSlider.addEventListener('input', function() {
+                threshold = parseInt(this.value);
+                thresholdValue.textContent = threshold;
+                doubleClickThreshold.textContent = threshold;
+            });
+            
+            // Reset statistics
+            resetStatsButton.addEventListener('click', function() {
+                clickCount = 0;
+                singleClickCount = 0;
+                doubleClickCount = 0;
+                lastClickTime = 0;
+                fastestDoubleClick = 0;
+                
+                totalClicksElement.textContent = '0';
+                singleClicksElement.textContent = '0';
+                doubleClicksElement.textContent = '0';
+                clickSpeedElement.textContent = '0';
+                fastestClickElement.textContent = '0';
+                
+                updateProgressBars();
+            });
+            
+            // Prevent text selection in click area
+            clickArea.addEventListener('mousedown', function(e) {
+                if (e.detail > 1) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Initialize tooltips
+            const tooltipElements = document.querySelectorAll('.tooltip');
+            tooltipElements.forEach(el => {
+                el.addEventListener('mouseenter', function() {
+                    const tooltipText = this.querySelector('.tooltip-text');
+                    if (tooltipText) {
+                        tooltipText.style.visibility = 'visible';
+                        tooltipText.style.opacity = '1';
+                    }
+                });
+                
+                el.addEventListener('mouseleave', function() {
+                    const tooltipText = this.querySelector('.tooltip-text');
+                    if (tooltipText) {
+                        tooltipText.style.visibility = 'hidden';
+                        tooltipText.style.opacity = '0';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

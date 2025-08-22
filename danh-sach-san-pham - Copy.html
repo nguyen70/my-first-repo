@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách sản phẩm</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 100px;
+        }
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.5em;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            text-align: left;
+            padding: 16px;
+            font-weight: 600;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #edf7ff;
+        }
+        .product-details {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 768px) {
+            .stats {
+                gap: 15px;
+            }
+            .stat-item {
+                min-width: 80px;
+                padding: 12px 15px;
+            }
+            th, td {
+                padding: 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            .stat-item {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Danh sách sản phẩm</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div>Tất cả</div>
+                <div class="stat-value">14</div>
+            </div>
+            <div class="stat-item">
+                <div>Thiếu hàng</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div>H.Thường</div>
+                <div class="stat-value">2</div>
+            </div>
+            <div class="stat-item">
+                <div>H.Mát</div>
+                <div class="stat-value">26</div>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th width="10%">STT</th>
+                    <th width="60%">Tên sản phẩm</th>
+                    <th width="30%">Số lượng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>
+                        Bí Đồ Hồ Lô
+                        <div class="product-details">Trái 800-1100g</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>
+                        Dừa Gọt Trọc 300-500gr/trái
+                        <div class="product-details">3 trái/ túi</div>
+                    </td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>
+                        [MKT] Khăn giấy rút đa năng cao cấp CARLIN 320 tờ 4 lớp (6G/T)
+                        <div class="product-details">Gói</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>
+                        Nho mẫu đơn nhập khẩu
+                        <div class="product-details">Hộp 500g</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>
+                        Gà cắt miếng CP khay 300g
+                        <div class="product-details">Khay 300g</div>
+                    </td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>
+                        Xà Lách Lolo
+                        <div class="product-details">Túi 300g</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>
+                        Cà Chua Loại 2 (trái 60g up)
+                        <div class="product-details">Túi 500g</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>
+                        Bưởi 5 roi, trái 950g- 1.4kg
+                        <div class="product-details">Trái 0,95 -1.4kg</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>
+                        Trái tắc
+                        <div class="product-details">Túi 500g</div>
+                    </td>
+                    <td>1</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">Bạn đã xem hết danh sách</div>
+    </div>
+</body>
+</html>
