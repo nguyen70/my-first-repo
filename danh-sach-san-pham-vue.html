@@ -54,82 +54,29 @@
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue;
+        const { createApp, ref, computed, onMounted } = Vue;
 
         createApp({
             setup() {
-                const products = ref([
-  {
-    "id": 1,
-    "name": "Sốt cà ri ớt Chà và",
-    "details": "Hũ 115g",
-    "quantity": 2,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 2,
-    "name": "Xốt Gia Vị Hoàn Chỉnh Cà Ri Barona",
-    "details": "Gói 80 gam",
-    "quantity": 1,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 3,
-    "name": "Cà Chua Cherry Dài",
-    "details": "Hộp 250g",
-    "quantity": 1,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 4,
-    "name": "Combo hành lá một rí",
-    "details": "Túi 100g",
-    "quantity": 1,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 5,
-    "name": "Dưa Leo Nhật",
-    "details": "Túi 500gr",
-    "quantity": 2,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 6,
-    "name": "Thịt Bò Xay Lưới Trung Đông",
-    "details": "Khay 250g",
-    "quantity": 2,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 7,
-    "name": "Trái Bầu",
-    "details": "Trái 400-600gr",
-    "quantity": 1,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 8,
-    "name": "Cá chêm filet (đông lạnh)",
-    "details": "Gói 300g-350g",
-    "quantity": 2,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 9,
-    "name": "Cá ngừ filet cắt steak Hoàng Hải",
-    "details": "Gói 250g-300g",
-    "quantity": 2,
-    "checkingQuantity": 0
-  },
-  {
-    "id": 10,
-    "name": "Hến sạch HQV",
-    "details": "Gói 400g",
-    "quantity": 4,
-    "checkingQuantity": 0
-  }
-]);
+                const products = ref([]);
+
+                const API_URL = 'https://aprent.vnbest.sbs/uploads/sendo/sendo.json';
+
+                const fetchProducts = async () => {
+                    try {
+                        const response = await fetch(API_URL);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        products.value = data.map(p => ({ ...p, checkingQuantity: 0 }));
+                    } catch (error) {
+                        console.error("Error fetching products:", error);
+                        // Optionally, display an error message to the user
+                    }
+                };
+
+                onMounted(fetchProducts);
 
                 const incrementChecking = (product) => {
                     if (product.checkingQuantity < product.quantity) {
