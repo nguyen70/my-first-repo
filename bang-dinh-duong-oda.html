@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng ODA Vitamin và Khoáng chất</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f7ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+        
+        .warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9f2ff;
+            border-radius: 8px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c5282;
+        }
+        
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background-color: #4b6cb7;
+            color: white;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+        }
+        
+        th:hover {
+            background-color: #3b5998;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        tr:hover {
+            background-color: #ebf4ff;
+        }
+        
+        .category-header {
+            background-color: #2c5282;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .vitamin {
+            background-color: #e6fffa;
+        }
+        
+        .mineral {
+            background-color: #fffaf0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            th, td {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BẢNG ODA (OPTIMUM DAILY ALLOWANCE)</h1>
+            <p class="subtitle">Liều lượng hàng ngày tối ưu cho Vitamin và Khoáng chất - Tham khảo để đạt sức khỏe tối ưu</p>
+        </header>
+        
+        <div class="warning">
+            <h3>⚠️ LƯU Ý QUAN TRỌNG</h3>
+            <p>ODA là mức dinh dưỡng nhằm tối ưu hóa sức khỏe, thường cao hơn RDA. Các giá trị này mang tính tham khảo và có thể thay đổi tùy theo cá nhân. <strong>Luôn tham khảo ý kiến chuyên gia y tế trước khi bổ sung liều cao</strong> bất kỳ vitamin hoặc khoáng chất nào.</p>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="search">Tìm kiếm:</label>
+                <input type="text" id="search" placeholder="Nhập tên chất dinh dưỡng...">
+            </div>
+            <div class="filter-group">
+                <label for="category">Loại:</label>
+                <select id="category">
+                    <option value="all">Tất cả</option>
+                    <option value="vitamin">Vitamin</option>
+                    <option value="mineral">Khoáng chất</option>
+                </select>
+            </div>
+        </div>
+        
+        <table id="oda-table">
+            <thead>
+                <tr>
+                    <th data-sort="nutrient">Chất dinh dưỡng ⇅</th>
+                    <th data-sort="rda">RDA/AI (Người lớn) ⇅</th>
+                    <th data-sort="oda">ODA (Phạm vi tham khảo) ⇅</th>
+                    <th data-sort="ul">Giới hạn trên (UL) ⇅</th>
+                    <th>Vai trò chính & Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="category-header">
+                    <td colspan="5">VITAMIN TAN TRONG NƯỚC</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin C</td>
+                    <td>75-90 mg</td>
+                    <td>250 - 1000 mg</td>
+                    <td>2000 mg</td>
+                    <td>Chống oxy hóa mạnh, tăng cường miễn dịch, tổng hợp collagen</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B1 (Thiamine)</td>
+                    <td>1.1-1.2 mg</td>
+                    <td>10 - 100 mg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ sản xuất năng lượng, chức năng thần kinh</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B2 (Riboflavin)</td>
+                    <td>1.1-1.3 mg</td>
+                    <td>10 - 100 mg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ chuyển hóa năng lượng, sức khỏe da và mắt</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B3 (Niacin)</td>
+                    <td>14-16 mg</td>
+                    <td>20 - 100 mg</td>
+                    <td>35 mg (dạng flush)</td>
+                    <td>Hỗ trợ cholesterol, sức khỏe tim mạch</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B5 (Pantothenic acid)</td>
+                    <td>5 mg</td>
+                    <td>25 - 200 mg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ sản xuất hormone và năng lượng</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B6 (Pyridoxine)</td>
+                    <td>1.3-1.7 mg</td>
+                    <td>10 - 50 mg</td>
+                    <td>100 mg</td>
+                    <td>Hỗ trợ chức năng não, tổng hợp neurotransmitter</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B9 (Folate)</td>
+                    <td>400 mcg</td>
+                    <td>400 - 800 mcg</td>
+                    <td>1000 mcg (dạng tổng hợp)</td>
+                    <td>Hỗ trợ phân chia tế bào, sức khỏe thai kỳ</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin B12 (Cobalamin)</td>
+                    <td>2.4 mcg</td>
+                    <td>500 - 2000 mcg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ tạo hồng cầu, chức năng thần kinh</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Biotin (B7)</td>
+                    <td>30 mcg</td>
+                    <td>1000 - 5000 mcg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ sức khỏe tóc, da, móng và chuyển hóa</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Choline</td>
+                    <td>425-550 mg</td>
+                    <td>250 - 1000 mg</td>
+                    <td>3500 mg</td>
+                    <td>Hỗ trợ chức năng gan và não bộ</td>
+                </tr>
+                
+                <tr class="category-header">
+                    <td colspan="5">VITAMIN TAN TRONG DẦU</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin A</td>
+                    <td>700-900 mcg RAE</td>
+                    <td>1500 - 5000 IU (450-1500 mcg)</td>
+                    <td>3000 mcg (10,000 IU)</td>
+                    <td>Sức khỏe mắt, miễn dịch. Cảnh giác với ngộ độc</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin D3</td>
+                    <td>600-800 IU (15-20 mcg)</td>
+                    <td>1000 - 4000 IU (25-100 mcg)</td>
+                    <td>4000 IU (100 mcg)</td>
+                    <td>Quan trọng cho miễn dịch, xương, tâm trạng</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin E</td>
+                    <td>15 mg (22.4 IU)</td>
+                    <td>100 - 400 IU (67-268 mg)</td>
+                    <td>1000 mg (1500 IU)</td>
+                    <td>Chống oxy hóa. Ưu tiên dạng mixed tocopherols</td>
+                </tr>
+                <tr class="vitamin">
+                    <td>Vitamin K2 (MK-7)</td>
+                    <td>90-120 mcg (K tổng)</td>
+                    <td>90 - 200 mcg</td>
+                    <td>Không xác định</td>
+                    <td>Dẫn canxi vào xương, ngăn ngừa vôi hóa động mạch</td>
+                </tr>
+                
+                <tr class="category-header">
+                    <td colspan="5">KHOÁNG CHẤT</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Boron</td>
+                    <td>Không có RDA</td>
+                    <td>3 - 5 mg</td>
+                    <td>20 mg</td>
+                    <td>Hỗ trợ sức khỏe xương và chức năng não</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Calci</td>
+                    <td>1000-1200 mg</td>
+                    <td>500 - 1000 mg (từ chế độ ăn + bổ sung)</td>
+                    <td>2500 mg</td>
+                    <td>Sức khỏe xương, co cơ. Nên bổ sung cùng Magie và K2</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Chromium</td>
+                    <td>25-35 mcg</td>
+                    <td>200 - 500 mcg</td>
+                    <td>Không xác định</td>
+                    <td>Hỗ trợ chuyển hóa đường và insulin</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Đồng (Copper)</td>
+                    <td>900 mcg</td>
+                    <td>1 - 2 mg</td>
+                    <td>10 mg</td>
+                    <td>Hỗ trợ hình thành hồng cầu. Cân bằng với Kẽm</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Iodine</td>
+                    <td>150 mcg</td>
+                    <td>150 - 300 mcg</td>
+                    <td>1100 mcg</td>
+                    <td>Hỗ trợ chức năng tuyến giáp và trao đổi chất</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Sắt (Iron)</td>
+                    <td>8-18 mg</td>
+                    <td>CHỈ BỔ SUNG KHI THIẾU</td>
+                    <td>45 mg</td>
+                    <td>Vận chuyển oxy. Không tự ý bổ sung không chỉ định</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Magie</td>
+                    <td>310-420 mg</td>
+                    <td>300 - 600 mg (từ chế độ ăn + bổ sung)</td>
+                    <td>350 mg (từ bổ sung)</td>
+                    <td>Thiếu hụt phổ biến. Hỗ trợ thư giãn cơ, giấc ngủ</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Manganese</td>
+                    <td>1.8-2.3 mg</td>
+                    <td>5 - 10 mg</td>
+                    <td>11 mg</td>
+                    <td>Hỗ trợ chống oxy hóa và sức khỏe xương</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Molybdenum</td>
+                    <td>45 mcg</td>
+                    <td>50 - 100 mcg</td>
+                    <td>2000 mcg</td>
+                    <td>Hỗ trợ giải độc</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Potassium</td>
+                    <td>2600-3400 mg</td>
+                    <td>TỪ THỰC PHẨM</td>
+                    <td>Không xác định</td>
+                    <td>Cân bằng điện giải, huyết áp</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Selenium</td>
+                    <td>55 mcg</td>
+                    <td>100 - 200 mcg</td>
+                    <td>400 mcg</td>
+                    <td>Chống oxy hóa mạnh, hỗ trợ tuyến giáp</td>
+                </tr>
+                <tr class="mineral">
+                    <td>Kẽm (Zinc)</td>
+                    <td>8-11 mg</td>
+                    <td>15 - 30 mg</td>
+                    <td>40 mg</td>
+                    <td>Hỗ trợ miễn dịch, chữa lành vết thương</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p>Bảng này chỉ mang tính chất tham khảo. Luôn tham khảo ý kiến bác sĩ hoặc chuyên gia dinh dưỡng trước khi bổ sung bất kỳ chất nào ở liều lượng ODA.</p>
+            <p>Nguồn: Tổng hợp từ các khuyến nghị dinh dưỡng quốc tế</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search');
+            const categoryFilter = document.getElementById('category');
+            const table = document.getElementById('oda-table');
+            const rows = table.querySelectorAll('tbody tr');
+            const headers = table.querySelectorAll('th');
+            
+            // Bộ lọc tìm kiếm
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                const category = categoryFilter.value;
+                
+                filterTable(searchText, category);
+            });
+            
+            // Bộ lọc danh mục
+            categoryFilter.addEventListener('change', function() {
+                const searchText = searchInput.value.toLowerCase();
+                const category = this.value;
+                
+                filterTable(searchText, category);
+            });
+            
+            // Sắp xếp bảng
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortBy = this.dataset.sort;
+                    const isAscending = this.classList.contains('asc');
+                    
+                    // Xóa các lớp sắp xếp hiện tại
+                    headers.forEach(h => {
+                        h.classList.remove('asc', 'desc');
+                    });
+                    
+                    // Thiết lập lớp sắp xếp mới
+                    this.classList.toggle('asc', !isAscending);
+                    this.classList.toggle('desc', isAscending);
+                    
+                    sortTable(sortBy, isAscending);
+                });
+            });
+            
+            function filterTable(searchText, category) {
+                rows.forEach(row => {
+                    if (row.classList.contains('category-header')) {
+                        // Xử lý hàng tiêu đề danh mục
+                        let categoryVisible = false;
+                        let nextRow = row.nextElementSibling;
+                        
+                        while (nextRow && !nextRow.classList.contains('category-header')) {
+                            const nutrient = nextRow.querySelector('td:first-child').textContent.toLowerCase();
+                            const rowCategory = nextRow.classList.contains('vitamin') ? 'vitamin' : 'mineral';
+                            
+                            if ((category === 'all' || category === rowCategory) && 
+                                nutrient.includes(searchText)) {
+                                categoryVisible = true;
+                                nextRow.style.display = '';
+                            } else {
+                                nextRow.style.display = 'none';
+                            }
+                            
+                            nextRow = nextRow.nextElementSibling;
+                        }
+                        
+                        row.style.display = categoryVisible ? '' : 'none';
+                    } else {
+                        // Xử lý hàng dữ liệu thông thường
+                        const nutrient = row.querySelector('td:first-child').textContent.toLowerCase();
+                        const rowCategory = row.classList.contains('vitamin') ? 'vitamin' : 'mineral';
+                        
+                        if ((category === 'all' || category === rowCategory) && 
+                            nutrient.includes(searchText)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            }
+            
+            function sortTable(sortBy, isAscending) {
+                // Logic sắp xếp bảng (có thể mở rộng)
+                alert(`Tính năng sắp xếp theo cột "${sortBy}" ${isAscending ? 'tăng dần' : 'giảm dần'} sẽ được triển khai ở phiên bản sau.`);
+            }
+        });
+    </script>
+</body>
+</html>

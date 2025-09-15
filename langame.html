@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tải Game và Hướng Dẫn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 3px;
+        }
+        .download-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        iframe {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-[1280px]">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-blue-600 mb-3">Cộng Đồng Game</h1>
+            <p class="text-gray-600 text-lg">Nơi chia sẻ đam mê và tải game miễn phí</p>
+            <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-green-400 mx-auto mt-4 rounded-full"></div>
+        </header>
+
+        <!-- Main Content - Single Column -->
+        <main class="space-y-10">
+            <!-- Chat Box -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 section-title">Khung Chat Nhóm</h2>
+                <p class="text-gray-600 mb-4">Tham gia trò chuyện với cộng đồng game thủ</p>
+                <div class="border rounded-xl overflow-hidden">
+                    <iframe src="https://www5.cbox.ws/box/?boxid=954350&boxtag=ckDr8a" width="100%" height="500" allowtransparency="yes" allow="autoplay" frameborder="0" marginheight="0" marginwidth="0" scrolling="auto"></iframe>
+                </div>
+            </section>
+
+            <!-- Download Links -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 section-title">Liên Kết Tải Game</h2>
+                <p class="text-gray-600 mb-6">Tải về các tựa game và tài liệu hướng dẫn</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Game Download -->
+                    <div class="border-2 border-blue-100 rounded-xl p-5 bg-gradient-to-br from-blue-50 to-white transition-all hover:shadow-md">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-gamepad text-blue-500 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg">Tải Game</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Liên kết tải game chính thức</p>
+                        <a href="https://drive.google.com/file/d/1yGrCzAHIWuJWIaCmpg1_wtvNKrFty2xi/view?usp=sharing" 
+                           target="_blank" 
+                           class="download-btn inline-flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg w-full">
+                            <i class="fas fa-download mr-2"></i>
+                            Tải Game
+                        </a>
+                    </div>
+
+                    <!-- Garenal Total Download -->
+                    <div class="border-2 border-green-100 rounded-xl p-5 bg-gradient-to-br from-green-50 to-white transition-all hover:shadow-md">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-star text-green-500 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg">Tải Garenal Total</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Bản mở rộng Garenal Total</p>
+                        <a href="https://drive.google.com/file/d/1DK3Q5ihTMWKbE4B3q6JCKNtoDK3qeSwc/view?usp=sharing" 
+                           target="_blank" 
+                           class="download-btn inline-flex items-center justify-center px-4 py-3 bg-green-500 text-white rounded-lg w-full">
+                            <i class="fas fa-download mr-2"></i>
+                            Tải Garenal Total
+                        </a>
+                    </div>
+
+                    <!-- PDF Guide Download -->
+                    <div class="border-2 border-purple-100 rounded-xl p-5 bg-gradient-to-br from-purple-50 to-white transition-all hover:shadow-md md:col-span-2">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-file-pdf text-purple-500 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg">Hướng Dẫn PDF</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Tải file hướng dẫn chi tiết</p>
+                        <a href="https://drive.google.com/file/d/1m7G_3gb5CIyda4tB3RaaaYpdLRetUS5Z/view?usp=sharing" 
+                           target="_blank" 
+                           class="download-btn inline-flex items-center justify-center px-4 py-3 bg-purple-500 text-white rounded-lg w-full">
+                            <i class="fas fa-download mr-2"></i>
+                            Tải Hướng Dẫn PDF
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PDF Viewer -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 section-title">Hướng Dẫn Chi Tiết</h2>
+                <p class="text-gray-600 mb-4">Xem trực tiếp file hướng dẫn dưới đây</p>
+                <div class="flex justify-center">
+                    <iframe src="https://drive.google.com/file/d/1m7G_3gb5CIyda4tB3RaaaYpdLRetUS5Z/preview" width="100%" height="800" allow="autoplay"></iframe>
+                </div>
+            </section>
+
+            <!-- Video Guide -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 section-title">Video Hướng Dẫn</h2>
+                <p class="text-gray-600 mb-4">Xem video hướng dẫn chi tiết từ YouTube</p>
+                <div class="aspect-w-16 aspect-h-9">
+                    <iframe width="100%" height="700" src="https://www.youtube.com/embed/SHly6brHY4s?si=Hzt9aNhSIwQJ3wUd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-600 py-6 border-t border-gray-200">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="text-blue-500 hover:text-blue-700"><i class="fab fa-facebook text-xl"></i></a>
+                <a href="#" class="text-purple-500 hover:text-purple-700"><i class="fab fa-discord text-xl"></i></a>
+                <a href="#" class="text-red-500 hover:text-red-700"><i class="fab fa-youtube text-xl"></i></a>
+                <a href="#" class="text-blue-400 hover:text-blue-600"><i class="fab fa-twitter text-xl"></i></a>
+            </div>
+            <p>© 2023 Cộng Đồng Game. Tất cả quyền được bảo lưu.</p>
+        </footer>
+    </div>
+</body>
+</html>
