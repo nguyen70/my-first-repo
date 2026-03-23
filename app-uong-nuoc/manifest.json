@@ -1,0 +1,17 @@
+{
+  "name": "Giờ Vàng Uống Nước",
+  "short_name": "Uống Nước",
+  "description": "Ứng dụng nhắc nhở lịch biểu uống nước khoa học hàng ngày.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3105/3105807.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
