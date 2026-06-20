@@ -607,11 +607,11 @@
                         <label>Giờ bình thường</label>
                         <div class="grid-2col">
                             <div class="input-wrapper">
-                                <input type="number" id="evnNormalKwh" value="1000" min="0" placeholder="Số lượng">
+                                <input type="number" id="evnNormalKwh" value="12108" min="0" placeholder="Số lượng">
                                 <span class="input-suffix">kWh</span>
                             </div>
                             <div class="input-wrapper">
-                                <input type="number" id="evnNormalPrice" value="2638" min="0" placeholder="Đơn giá">
+                                <input type="number" id="evnNormalPrice" value="3152" min="0" placeholder="Đơn giá">
                                 <span class="input-suffix">đ</span>
                             </div>
                         </div>
@@ -622,11 +622,11 @@
                         <label>Giờ cao điểm</label>
                         <div class="grid-2col">
                             <div class="input-wrapper">
-                                <input type="number" id="evnPeakKwh" value="400" min="0" placeholder="Số lượng">
+                                <input type="number" id="evnPeakKwh" value="4637" min="0" placeholder="Số lượng">
                                 <span class="input-suffix">kWh</span>
                             </div>
                             <div class="input-wrapper">
-                                <input type="number" id="evnPeakPrice" value="4578" min="0" placeholder="Đơn giá">
+                                <input type="number" id="evnPeakPrice" value="5422" min="0" placeholder="Đơn giá">
                                 <span class="input-suffix">đ</span>
                             </div>
                         </div>
@@ -637,13 +637,22 @@
                         <label>Giờ thấp điểm</label>
                         <div class="grid-2col">
                             <div class="input-wrapper">
-                                <input type="number" id="evnOffpeakKwh" value="600" min="0" placeholder="Số lượng">
+                                <input type="number" id="evnOffpeakKwh" value="3694" min="0" placeholder="Số lượng">
                                 <span class="input-suffix">kWh</span>
                             </div>
                             <div class="input-wrapper">
-                                <input type="number" id="evnOffpeakPrice" value="1622" min="0" placeholder="Đơn giá">
+                                <input type="number" id="evnOffpeakPrice" value="1918" min="0" placeholder="Đơn giá">
                                 <span class="input-suffix">đ</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Thuế VAT -->
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label for="evnVatPercent">Thuế GTGT (VAT) điện lưới</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="evnVatPercent" value="8" min="0" max="20" step="1">
+                            <span class="input-suffix">%</span>
                         </div>
                     </div>
                 </div>
@@ -659,14 +668,14 @@
                         <div class="input-group">
                             <label>Dùng Ban ngày</label>
                             <div class="input-wrapper">
-                                <input type="number" id="dayPercent" value="70" min="0" max="100">
+                                <input type="number" id="dayPercent" value="81.9" min="0" max="100" step="0.1">
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="input-group">
                             <label>Dùng Ban đêm</label>
                             <div class="input-wrapper">
-                                <input type="number" id="nightPercent" value="30" readonly>
+                                <input type="number" id="nightPercent" value="18.1" readonly>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
@@ -696,7 +705,7 @@
                     <div class="input-group">
                         <label for="solarCapacity">Công suất ĐMT</label>
                         <div class="input-wrapper">
-                            <input type="number" id="solarCapacity" value="10" min="0.5" step="0.5">
+                            <input type="number" id="solarCapacity" value="100" min="0.5" step="0.5">
                             <span class="input-suffix">kWp</span>
                         </div>
                     </div>
@@ -706,10 +715,10 @@
                             <i class="fa-solid fa-circle-info info-tip" title="Nhập tổng số tiền bạn đầu tư hoặc hệ thống sẽ tự tính ước lượng theo giá thị trường khoảng 14 Triệu VNĐ/kWp. Tự động thêm dấu phẩy phân cách phần nghìn khi nhập."></i>
                         </label>
                         <div class="input-wrapper">
-                            <input type="text" id="solarCapex" value="140,000,000" placeholder="Nhập số tiền">
+                            <input type="text" id="solarCapex" value="1,400,000,000" placeholder="Nhập số tiền">
                             <span class="input-suffix">VNĐ</span>
                         </div>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;" id="capexEstimateLabel">Ước tính: ~140,000,000 VNĐ (14tr/kWp)</p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;" id="capexEstimateLabel">Ước tính: ~1,400,000,000 VNĐ (14tr/kWp)</p>
                     </div>
 
                     <div class="input-group">
@@ -856,8 +865,12 @@
                                         <td style="text-align: right;" id="valRoofArea" class="highlight">0 m²</td>
                                     </tr>
                                     <tr>
-                                        <td>Giá điện TB ban ngày EVN</td>
+                                        <td>Giá điện TB ban ngày EVN (chưa VAT)</td>
                                         <td style="text-align: right;" id="valEvnDayAvg">0 đ/kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Giá điện TB ban ngày EVN (gồm VAT)</td>
+                                        <td style="text-align: right;" id="valEvnDayAvgVat" class="highlight">0 đ/kWh</td>
                                     </tr>
                                     <tr>
                                         <td>Giá thành sản xuất 1 kWh ĐMT (LCOE)
@@ -958,6 +971,7 @@
         const evnPeakPriceInput = document.getElementById('evnPeakPrice');
         const evnOffpeakKwhInput = document.getElementById('evnOffpeakKwh');
         const evnOffpeakPriceInput = document.getElementById('evnOffpeakPrice');
+        const evnVatPercentInput = document.getElementById('evnVatPercent');
         
         const dayPercentInput = document.getElementById('dayPercent');
         const nightPercentInput = document.getElementById('nightPercent');
@@ -986,6 +1000,7 @@
         const valPaybackDesc = document.getElementById('valPaybackDesc');
         const valRoofArea = document.getElementById('valRoofArea');
         const valEvnDayAvg = document.getElementById('valEvnDayAvg');
+        const valEvnDayAvgVat = document.getElementById('valEvnDayAvgVat');
         const valLcoe = document.getElementById('valLcoe');
         const valSavingsPerKwh = document.getElementById('valSavingsPerKwh');
         const valSolarUsed = document.getElementById('valSolarUsed');
@@ -1032,8 +1047,8 @@
             formatInputWithCommas(e.target);
         });
 
-        const LOCAL_STORAGE_KEY = 'solar_calc_inputs_v1';
-        const THEME_STORAGE_KEY = 'solar_calc_theme_v1';
+        const LOCAL_STORAGE_KEY = 'solar_calc_inputs_v3';
+        const THEME_STORAGE_KEY = 'solar_calc_theme_v3';
 
         function saveInputs() {
             const inputs = {
@@ -1043,6 +1058,7 @@
                 evnPeakPrice: evnPeakPriceInput.value,
                 evnOffpeakKwh: evnOffpeakKwhInput.value,
                 evnOffpeakPrice: evnOffpeakPriceInput.value,
+                evnVatPercent: evnVatPercentInput.value,
                 dayPercent: dayPercentInput.value,
                 loadProfile: loadProfileSelect.value,
                 solarCapacity: solarCapacityInput.value,
@@ -1075,6 +1091,7 @@
                 if (inputs.evnPeakPrice !== undefined) evnPeakPriceInput.value = inputs.evnPeakPrice;
                 if (inputs.evnOffpeakKwh !== undefined) evnOffpeakKwhInput.value = inputs.evnOffpeakKwh;
                 if (inputs.evnOffpeakPrice !== undefined) evnOffpeakPriceInput.value = inputs.evnOffpeakPrice;
+                if (inputs.evnVatPercent !== undefined) evnVatPercentInput.value = inputs.evnVatPercent;
                 
                 if (inputs.dayPercent !== undefined) {
                     dayPercentInput.value = inputs.dayPercent;
@@ -1173,6 +1190,7 @@
                 evnPeakPrice: parseFloat(evnPeakPriceInput.value) || 0,
                 evnOffpeakKwh: parseFloat(evnOffpeakKwhInput.value) || 0,
                 evnOffpeakPrice: parseFloat(evnOffpeakPriceInput.value) || 0,
+                evnVatPercent: parseFloat(evnVatPercentInput.value) || 0,
                 
                 dayPercent: parseFloat(dayPercentInput.value) || 0,
                 nightPercent: parseFloat(nightPercentInput.value) || 0,
@@ -1201,65 +1219,60 @@
             const solarGenMonth = solarGenYear1 / 12;
             
             // 3. Tính tỷ lệ dư thừa lãng phí do bám tải (Zero Export)
-            // R = tỷ lệ sản lượng điện ĐMT sinh ra so với tải tiêu thụ ban ngày
             const R = dayEvnKwhMonth > 0 ? (solarGenMonth / dayEvnKwhMonth) : 999;
             
             let wasteRate = 0;
             if (inputs.loadProfile === 'noon') {
-                // Tải tập trung trưa (quá trình tự dùng cực cao)
                 if (R <= 0.5) {
                     wasteRate = 0.01; 
                 } else if (R <= 1.2) {
-                    wasteRate = 0.01 + ((R - 0.5) / 0.7) * 0.19; // Lên tối đa 20% khi tỷ lệ = 1.2
+                    wasteRate = 0.01 + ((R - 0.5) / 0.7) * 0.19;
                 } else {
-                    wasteRate = 1 - (0.96 / R); // Kịch trần tự dùng 96% tải ban ngày
+                    wasteRate = 1 - (0.96 / R);
                 }
             } else if (inputs.loadProfile === 'steady') {
-                // Tải đều đặn
                 if (R <= 0.25) {
                     wasteRate = 0.03;
                 } else if (R <= 1.0) {
-                    wasteRate = 0.03 + ((R - 0.25) / 0.75) * 0.32; // Lên tối đa 35% khi tỷ lệ = 1.0
+                    wasteRate = 0.03 + ((R - 0.25) / 0.75) * 0.32;
                 } else {
-                    wasteRate = 1 - (0.65 / R); // Tự dùng tối đa 65% tải ban ngày
+                    wasteRate = 1 - (0.65 / R);
                 }
             } else {
-                // Tải tập trung sáng & chiều (hao phí lớn vì buổi trưa ít xài điện)
                 if (R <= 0.15) {
                     wasteRate = 0.05;
                 } else if (R <= 0.8) {
-                    wasteRate = 0.05 + ((R - 0.15) / 0.65) * 0.45; // Lên tối đa 50% khi tỷ lệ = 0.8
+                    wasteRate = 0.05 + ((R - 0.15) / 0.65) * 0.45;
                 } else {
-                    wasteRate = 1 - (0.40 / R); // Tự dùng tối đa 40% tải ban ngày
+                    wasteRate = 1 - (0.40 / R);
                 }
             }
             
-            wasteRate = Math.max(0.01, Math.min(0.98, wasteRate)); // Giới hạn từ 1% đến 98%
+            wasteRate = Math.max(0.01, Math.min(0.98, wasteRate)); 
             
-            // Sản lượng sử dụng thực tế và sản lượng lãng phí
             const solarUsedYear1 = solarGenYear1 * (1 - wasteRate);
             const solarUsedMonth = solarGenMonth * (1 - wasteRate);
             const solarWastedYear1 = solarGenYear1 * wasteRate;
             
-            // 4. Giá điện trung bình ban ngày EVN
-            // Điện mặt trời chỉ phát ban ngày. Khung giờ EVN ban ngày gồm Cao điểm trưa (40% tổng giờ cao điểm) và Bình thường ngày.
-            const dayPeakKwh = Math.min(dayEvnKwhMonth, inputs.evnPeakKwh * 0.4); // Giới hạn tối đa 40% giờ cao điểm (9h30 - 11h30)
-            const dayNormalKwh = Math.max(0, dayEvnKwhMonth - dayPeakKwh);
-            const dayEvnCost = (dayPeakKwh * inputs.evnPeakPrice) + (dayNormalKwh * inputs.evnNormalPrice);
+            const dayPeakKwh = Math.min(dayEvnKwhMonth, inputs.evnPeakKwh * 0.6);
+            const dayNormalKwh = Math.min(Math.max(0, dayEvnKwhMonth - dayPeakKwh), inputs.evnNormalKwh * 0.75);
+            const dayOffpeakKwh = Math.max(0, dayEvnKwhMonth - dayPeakKwh - dayNormalKwh);
+
+            const dayEvnCost = (dayPeakKwh * inputs.evnPeakPrice) + (dayNormalKwh * inputs.evnNormalPrice) + (dayOffpeakKwh * inputs.evnOffpeakPrice);
             const evnDayAvgPrice = dayEvnKwhMonth > 0 ? (dayEvnCost / dayEvnKwhMonth) : inputs.evnNormalPrice;
 
-            // 5. Tiết kiệm điện năm đầu tiên (ĐMT thay thế điện giá đắt ban ngày trước)
+            const vatMultiplier = 1 + (inputs.evnVatPercent / 100);
+
             const savePeakMonth = Math.min(solarUsedMonth, dayPeakKwh);
             const saveNormalMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth), dayNormalKwh);
+            const saveOffpeakMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth - saveNormalMonth), dayOffpeakKwh);
             
-            const savingsMonth = (savePeakMonth * inputs.evnPeakPrice) + (saveNormalMonth * inputs.evnNormalPrice);
+            const savingsMonthBeforeVat = (savePeakMonth * inputs.evnPeakPrice) + (saveNormalMonth * inputs.evnNormalPrice) + (saveOffpeakMonth * inputs.evnOffpeakPrice);
+            const savingsMonth = savingsMonthBeforeVat * vatMultiplier;
             const savingsYear1 = savingsMonth * 12;
 
-            // 6. Mức tiết kiệm trên 1 kWh ĐMT sử dụng được
             const savingsPerKwh = solarUsedYear1 > 0 ? (savingsYear1 / solarUsedYear1) : 0;
             
-            // 7. Giá thành sản xuất 1 kWh ĐMT (LCOE) - Vòng đời 20 năm
-            // Khấu hao hiệu suất pin và chi phí bảo trì O&M, thay inverter động
             const degradationRate = inputs.degradationRate / 100;
             const evnPriceIncreaseRate = inputs.evnEscalationRate / 100;
             const omPercent = inputs.omPercent / 100;
@@ -1271,17 +1284,15 @@
                 totalSolarUsed20Years += solarUsedYear1 * Math.pow(1 - degradationRate, t - 1);
             }
             
-            const omCost20Years = inputs.solarCapex * omPercent * 19; // Vận hành 19 năm (năm 2 đến 20)
+            const omCost20Years = inputs.solarCapex * omPercent * 19;
             const totalLifeCycleCost = inputs.solarCapex + inverterReplacement + omCost20Years;
             const lcoeUsed = totalSolarUsed20Years > 0 ? (totalLifeCycleCost / totalSolarUsed20Years) : 0;
 
-            // 8. Dòng tiền tích lũy và hoàn vốn
             let cumulativeCashFlow = -inputs.solarCapex;
             const cashFlows = [cumulativeCashFlow];
             let paybackPeriod = -1;
             
             const detailedCashflows = [];
-            // Thêm năm 0 (đầu tư ban đầu)
             detailedCashflows.push({
                 year: 0,
                 solarGen: 0,
@@ -1325,7 +1336,6 @@
             
             const roi20Years = inputs.solarCapex > 0 ? ((cashFlows[20] + inputs.solarCapex) / inputs.solarCapex) * 100 : 0;
 
-            // RENDER OUTPUTS TO DOM
             valCapex.innerText = formatCurrency(inputs.solarCapex);
             valSolarGen.innerText = `${formatNumber(solarGenYear1)} kWh`;
             valSavingsYear1.innerText = formatCurrency(savingsYear1);
@@ -1345,6 +1355,7 @@
 
             valRoofArea.innerText = `${formatNumber(roofArea, 1)} m²`;
             valEvnDayAvg.innerText = `${formatNumber(evnDayAvgPrice, 0)} đ/kWh`;
+            valEvnDayAvgVat.innerText = `${formatNumber(evnDayAvgPrice * vatMultiplier, 0)} đ/kWh`;
             valLcoe.innerText = `${formatNumber(lcoeUsed, 0)} đ/kWh`;
             valSavingsPerKwh.innerText = `${formatNumber(savingsPerKwh, 0)} đ/kWh`;
             valSolarUsed.innerText = `${formatNumber(solarUsedYear1)} kWh/năm`;
