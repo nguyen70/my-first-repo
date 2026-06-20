@@ -1242,18 +1242,17 @@
             const solarWastedYear1 = solarGenYear1 * wasteRate;
             
             // 4. Giá điện trung bình ban ngày EVN
-            // Ước tính trong ngày phụ tải bao gồm toàn bộ Giờ Cao Điểm và một phần Giờ Bình Thường
-            const peakInDay = Math.min(dayEvnKwhMonth, inputs.evnPeakKwh);
-            const normalInDay = Math.max(0, dayEvnKwhMonth - peakInDay);
-            const dayEvnCost = (peakInDay * inputs.evnPeakPrice) + (normalInDay * inputs.evnNormalPrice);
+            // Điện mặt trời chỉ phát ban ngày. Khung giờ EVN ban ngày gồm Cao điểm trưa (40% tổng giờ cao điểm) và Bình thường ngày.
+            const dayPeakKwh = Math.min(dayEvnKwhMonth, inputs.evnPeakKwh * 0.4); // Giới hạn tối đa 40% giờ cao điểm (9h30 - 11h30)
+            const dayNormalKwh = Math.max(0, dayEvnKwhMonth - dayPeakKwh);
+            const dayEvnCost = (dayPeakKwh * inputs.evnPeakPrice) + (dayNormalKwh * inputs.evnNormalPrice);
             const evnDayAvgPrice = dayEvnKwhMonth > 0 ? (dayEvnCost / dayEvnKwhMonth) : inputs.evnNormalPrice;
 
-            // 5. Tiết kiệm điện năm đầu tiên (ĐMT thay thế giá đắt trước)
-            const savePeakMonth = Math.min(solarUsedMonth, inputs.evnPeakKwh);
-            const saveNormalMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth), inputs.evnNormalKwh);
-            const saveOffpeakMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth - saveNormalMonth), inputs.evnOffpeakKwh);
+            // 5. Tiết kiệm điện năm đầu tiên (ĐMT thay thế điện giá đắt ban ngày trước)
+            const savePeakMonth = Math.min(solarUsedMonth, dayPeakKwh);
+            const saveNormalMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth), dayNormalKwh);
             
-            const savingsMonth = (savePeakMonth * inputs.evnPeakPrice) + (saveNormalMonth * inputs.evnNormalPrice) + (saveOffpeakMonth * inputs.evnOffpeakPrice);
+            const savingsMonth = (savePeakMonth * inputs.evnPeakPrice) + (saveNormalMonth * inputs.evnNormalPrice);
             const savingsYear1 = savingsMonth * 12;
 
             // 6. Mức tiết kiệm trên 1 kWh ĐMT sử dụng được
