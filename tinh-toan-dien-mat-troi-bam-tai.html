@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ Tính toán Hiệu quả Điện mặt trời Bám tải (Tây Ninh)</title>
+    <meta name="description" content="Công cụ tính toán hiệu quả kinh tế, kỹ thuật, thời gian hoàn vốn và tỷ lệ lãng phí của hệ thống điện mặt trời bám tải (Zero Export) tại Tây Ninh.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #f59e0b;
+            --primary-hover: #d97706;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --border: #334155;
+            --input-bg: #0f172a;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --glow: 0 0 15px rgba(245, 158, 11, 0.15);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --primary: #d97706;
+            --primary-hover: #b45309;
+            --success: #059669;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --border: #e2e8f0;
+            --input-bg: #f1f5f9;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --glow: 0 0 15px rgba(217, 119, 6, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-title i {
+            color: var(--primary);
+            font-size: 2.25rem;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+        }
+
+        .brand-title h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, var(--primary), #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 380px 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Input Controls */
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-right: 3rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+        }
+
+        .input-wrapper select {
+            padding-right: 2rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25rem;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Results dashboard */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Key Metrics Grid */
+        .metrics-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .metric-tile {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            position: relative;
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .metric-icon.primary { background: rgba(245, 158, 11, 0.15); color: var(--primary); }
+        .metric-icon.success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .metric-icon.danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .metric-icon.info { background: rgba(6, 180, 212, 0.15); color: var(--info); }
+
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        /* Detailed Results Tables & Charts */
+        .results-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1200px) {
+            .results-details {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .chart-box {
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table.analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        table.analysis-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        table.analysis-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        table.analysis-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        table.analysis-table td.highlight {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        table.analysis-table td.success-text {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        table.analysis-table td.danger-text {
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        /* Action Buttons */
+        .btn-calc {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-hover));
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-calc:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-calc:active {
+            transform: translateY(1px);
+        }
+
+        /* Tabs menu for Charts */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Notification Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Help Info Icon styles */
+        .info-tip {
+            display: inline-block;
+            margin-left: 0.25rem;
+            color: var(--text-secondary);
+            cursor: help;
+            font-size: 0.8rem;
+        }
+
+        .info-tip:hover {
+            color: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { transform: scale(0.97); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Styles for input group grid */
+        .grid-3col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Disclaimer footer */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand-title">
+                <i class="fa-solid fa-solar-panel"></i>
+                <div>
+                    <h1>ĐMT BÁM TẢI OPTIMA</h1>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">Phân tích Hiệu quả Đầu tư & Lãng phí bám tải (Tây Ninh)</p>
+                </div>
+            </div>
+            <button class="theme-toggle" id="themeBtn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- LEFT COLUMN: INPUTS -->
+            <aside class="inputs-panel" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- EVN INPUTS -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-bolt"></i>
+                        Điện lưới EVN Hàng Tháng
+                    </div>
+                    
+                    <!-- Giờ Bình Thường -->
+                    <div class="input-group">
+                        <label>Giờ bình thường</label>
+                        <div class="grid-2col">
+                            <div class="input-wrapper">
+                                <input type="number" id="evnNormalKwh" value="1000" min="0" placeholder="Số lượng">
+                                <span class="input-suffix">kWh</span>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="number" id="evnNormalPrice" value="2638" min="0" placeholder="Đơn giá">
+                                <span class="input-suffix">đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Giờ Cao Điểm -->
+                    <div class="input-group">
+                        <label>Giờ cao điểm</label>
+                        <div class="grid-2col">
+                            <div class="input-wrapper">
+                                <input type="number" id="evnPeakKwh" value="400" min="0" placeholder="Số lượng">
+                                <span class="input-suffix">kWh</span>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="number" id="evnPeakPrice" value="4578" min="0" placeholder="Đơn giá">
+                                <span class="input-suffix">đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Giờ Thấp Điểm -->
+                    <div class="input-group">
+                        <label>Giờ thấp điểm</label>
+                        <div class="grid-2col">
+                            <div class="input-wrapper">
+                                <input type="number" id="evnOffpeakKwh" value="600" min="0" placeholder="Số lượng">
+                                <span class="input-suffix">kWh</span>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="number" id="evnOffpeakPrice" value="1622" min="0" placeholder="Đơn giá">
+                                <span class="input-suffix">đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LOAD PROFILE & TIME SPAN -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Phân bổ phụ tải tiêu thụ
+                    </div>
+                    
+                    <div class="grid-2col">
+                        <div class="input-group">
+                            <label>Dùng Ban ngày</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="dayPercent" value="70" min="0" max="100">
+                                <span class="input-suffix">%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Dùng Ban đêm</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="nightPercent" value="30" readonly>
+                                <span class="input-suffix">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="loadProfile">Biểu đồ phụ tải ngày
+                            <i class="fa-solid fa-circle-info info-tip" title="Độ khớp phụ tải quyết định mức độ hao phí của hệ thống bám tải (Zero-Export) vào giờ nắng cao điểm trưa."></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <select id="loadProfile">
+                                <option value="steady" selected>Đều đặn cả ngày (Hộ gia đình/Văn phòng)</option>
+                                <option value="noon">Tập trung buổi trưa (Sản xuất/Máy lạnh trưa)</option>
+                                <option value="shoulder">Tập trung Sáng & Chiều (Ít dùng buổi trưa)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOLAR INPUTS -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-sun"></i>
+                        Hệ thống ĐMT bám tải
+                    </div>
+
+                    <div class="input-group">
+                        <label for="solarCapacity">Công suất ĐMT</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="solarCapacity" value="10" min="0.5" step="0.5">
+                            <span class="input-suffix">kWp</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="solarCapex">Tổng vốn đầu tư (CAPEX)
+                            <i class="fa-solid fa-circle-info info-tip" title="Nhập tổng số tiền bạn đầu tư hoặc hệ thống sẽ tự tính ước lượng theo giá thị trường khoảng 14 Triệu VNĐ/kWp. Tự động thêm dấu phẩy phân cách phần nghìn khi nhập."></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" id="solarCapex" value="140,000,000" placeholder="Nhập số tiền">
+                            <span class="input-suffix">VNĐ</span>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;" id="capexEstimateLabel">Ước tính: ~140,000,000 VNĐ (14tr/kWp)</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sunHoursPerYear">Nắng Tây Ninh
+                            <i class="fa-solid fa-circle-info info-tip" title="Số giờ nắng tương đương (Peak Sun Hours) trung bình năm tại Tây Ninh (khoảng 1400 - 1500 kWh/kWp/năm). Tùy chỉnh nếu cần."></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sunHoursPerYear" value="1460" min="1000" max="2000">
+                            <span class="input-suffix">kWh/kWp</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-calc" id="btnCalculate">
+                        <i class="fa-solid fa-calculator"></i>
+                        Tính Toán Kết Quả
+                    </button>
+                </div>
+
+                <!-- 20 YEARS FINANCIAL PARAMETERS -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Thông số Vận hành 20 năm
+                    </div>
+
+                    <!-- Bảo trì & Suy hao -->
+                    <div class="grid-2col">
+                        <div class="input-group">
+                            <label for="omPercent">Bảo trì O&M
+                                <i class="fa-solid fa-circle-info info-tip" title="Chi phí vận hành và bảo trì hàng năm, tính bằng % của CAPEX (mặc định 1%)."></i>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="omPercent" value="1" min="0" max="10" step="0.1">
+                                <span class="input-suffix">%/năm</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="degradationRate">Suy hao pin
+                                <i class="fa-solid fa-circle-info info-tip" title="Tỷ lệ suy giảm hiệu suất phát điện của pin mặt trời hàng năm (mặc định 0.7%/năm)."></i>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="degradationRate" value="0.7" min="0" max="5" step="0.1">
+                                <span class="input-suffix">%/năm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thay thế Inverter -->
+                    <div class="grid-2col">
+                        <div class="input-group">
+                            <label for="inverterReplacementPercent">Thay Inverter
+                                <i class="fa-solid fa-circle-info info-tip" title="Chi phí thay thế Inverter, tính bằng % của CAPEX (mặc định 15% CAPEX)."></i>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inverterReplacementPercent" value="15" min="0" max="50">
+                                <span class="input-suffix">% CAPEX</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="inverterReplacementYear">Năm thay thế
+                                <i class="fa-solid fa-circle-info info-tip" title="Năm dự kiến cần thay thế Inverter mới do hết tuổi thọ (thường là năm thứ 10)."></i>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inverterReplacementYear" value="10" min="1" max="20">
+                                <span class="input-suffix">Năm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lạm phát giá điện EVN -->
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label for="evnEscalationRate">Tăng giá điện EVN dự kiến
+                            <i class="fa-solid fa-circle-info info-tip" title="Tỷ lệ tăng giá điện trung bình của EVN hàng năm (mặc định 3%/năm)."></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="number" id="evnEscalationRate" value="3" min="0" max="15" step="0.5">
+                            <span class="input-suffix">%/năm</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- RIGHT COLUMN: RESULTS & OUTPUTS -->
+            <main class="results-container">
+                <!-- METRIC CARDS -->
+                <div class="metrics-summary-grid">
+                    <!-- CAPEX -->
+                    <div class="metric-tile">
+                        <div class="metric-icon primary"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Chi phí đầu tư (CAPEX)</span>
+                            <span class="metric-value" id="valCapex">0đ</span>
+                            <span class="metric-desc">Tổng chi phí lắp đặt ban đầu</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Sản lượng -->
+                    <div class="metric-tile">
+                        <div class="metric-icon success"><i class="fa-solid fa-plug"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Sản lượng năm đầu</span>
+                            <span class="metric-value" id="valSolarGen">0 kWh</span>
+                            <span class="metric-desc">Tại Tây Ninh (~1,460 giờ nắng)</span>
+                        </div>
+                    </div>
+
+                    <!-- Tiết kiệm năm đầu -->
+                    <div class="metric-tile">
+                        <div class="metric-icon info"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Tiết kiệm năm đầu</span>
+                            <span class="metric-value" id="valSavingsYear1" style="color: var(--success);">0đ</span>
+                            <span class="metric-desc">Bù đắp trực tiếp hóa đơn điện</span>
+                        </div>
+                    </div>
+
+                    <!-- Hoàn vốn -->
+                    <div class="metric-tile">
+                        <div class="metric-icon success" id="tilePaybackIcon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Thời gian hoàn vốn</span>
+                            <span class="metric-value" id="valPayback">0 năm</span>
+                            <span class="metric-desc" id="valPaybackDesc">Tính từ dòng tiền tích lũy lũy tiến</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETAIL ANALYTICS GRID -->
+                <div class="results-details">
+                    <!-- Table Detail card -->
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-list-check"></i> Chỉ số Phân tích Chi tiết</div>
+                        <div class="table-responsive">
+                            <table class="analysis-table">
+                                <thead>
+                                    <tr>
+                                        <th>Chỉ số</th>
+                                        <th style="text-align: right;">Giá trị</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Diện tích mái yêu cầu</td>
+                                        <td style="text-align: right;" id="valRoofArea" class="highlight">0 m²</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Giá điện TB ban ngày EVN</td>
+                                        <td style="text-align: right;" id="valEvnDayAvg">0 đ/kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Giá thành sản xuất 1 kWh ĐMT (LCOE)
+                                            <i class="fa-solid fa-circle-info info-tip" title="Levelized Cost of Energy: Tính tổng chi phí vòng đời 20 năm (gồm CAPEX, bảo trì O&M, thay inverter) chia cho tổng sản lượng điện tự dùng thực tế trong 20 năm."></i>
+                                        </td>
+                                        <td style="text-align: right;" id="valLcoe" class="highlight">0 đ/kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mức tiết kiệm trên mỗi 1 kWh</td>
+                                        <td style="text-align: right;" id="valSavingsPerKwh" class="success-text">0 đ/kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lượng điện tự dùng thực tế</td>
+                                        <td style="text-align: right;" id="valSolarUsed">0 kWh/năm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lượng điện dư thừa bị lãng phí
+                                            <i class="fa-solid fa-circle-info info-tip" title="Lượng điện năng mặt trời phát ra vượt quá tải tiêu thụ ban ngày tại thời điểm phát, do hệ thống bám tải (Zero Export) phải tự động hạ công suất để tránh phát lên lưới điện."></i>
+                                        </td>
+                                        <td style="text-align: right;" id="valSolarWasted" class="danger-text">0 kWh/năm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tỷ lệ lãng phí / tổng sản lượng</td>
+                                        <td style="text-align: right;" id="valWasteRate" class="danger-text">0%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tỷ suất ROI (Sau 20 năm)
+                                            <i class="fa-solid fa-circle-info info-tip" title="Tỷ suất lợi nhuận trên số vốn ban đầu sau 20 năm vận hành."></i>
+                                        </td>
+                                        <td style="text-align: right;" id="valRoi" class="success-text">0%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Visual Representation card (Charts) -->
+                    <div class="card" style="display: flex; flex-direction: column;">
+                        <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Trực quan hóa dữ liệu</div>
+                        <div class="tabs">
+                            <button class="tab-btn active" onclick="switchTab('usageTab', event)">Sử dụng điện</button>
+                            <button class="tab-btn" onclick="switchTab('cashflowTab', event)">Dòng tiền hoàn vốn</button>
+                        </div>
+                        
+                        <div class="chart-box" id="usageTab">
+                            <canvas id="usageChart"></canvas>
+                        </div>
+                        <div class="chart-box" id="cashflowTab" style="display: none;">
+                            <canvas id="cashflowChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Bảng Dòng Tiền Chi Tiết 20 Năm -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-title">
+                <i class="fa-solid fa-table-list"></i>
+                Bảng Phân Tích Dòng Tiền Chi Tiết 20 Năm
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Bảng số liệu chi tiết minh họa dòng tiền hàng năm bao gồm khấu hao hiệu suất pin mặt trời, phí bảo trì O&M, phí thay thế Inverter và tỷ lệ trượt giá điện của EVN theo thông số bạn đã thiết lập.
+            </p>
+            <div class="table-responsive" style="margin-top: 0; max-height: 500px; overflow-y: auto;">
+                <table class="analysis-table" id="cashflowTableDirect">
+                    <thead>
+                        <tr style="position: sticky; top: 0; background: var(--card-bg); z-index: 10;">
+                            <th>Năm</th>
+                            <th style="text-align: right;">Sản lượng điện (kWh)</th>
+                            <th style="text-align: right;">EVN Tiết kiệm (đ)</th>
+                            <th style="text-align: right;">Phí bảo dưỡng O&M (đ)</th>
+                            <th style="text-align: right;">Phí thay thế Inverter (đ)</th>
+                            <th style="text-align: right;">Dòng tiền ròng (đ)</th>
+                            <th style="text-align: right;">Lũy kế dòng tiền (đ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Điền động bằng JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 ĐMT BÁM TẢI OPTIMA - Phát triển bởi Antigravity. Dữ liệu khí tượng Tây Ninh & biểu giá điện EVN hiện hành.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // DOM Elements
+        const evnNormalKwhInput = document.getElementById('evnNormalKwh');
+        const evnNormalPriceInput = document.getElementById('evnNormalPrice');
+        const evnPeakKwhInput = document.getElementById('evnPeakKwh');
+        const evnPeakPriceInput = document.getElementById('evnPeakPrice');
+        const evnOffpeakKwhInput = document.getElementById('evnOffpeakKwh');
+        const evnOffpeakPriceInput = document.getElementById('evnOffpeakPrice');
+        
+        const dayPercentInput = document.getElementById('dayPercent');
+        const nightPercentInput = document.getElementById('nightPercent');
+        const loadProfileSelect = document.getElementById('loadProfile');
+        
+        const solarCapacityInput = document.getElementById('solarCapacity');
+        const solarCapexInput = document.getElementById('solarCapex');
+        const sunHoursPerYearInput = document.getElementById('sunHoursPerYear');
+        
+        const capexEstimateLabel = document.getElementById('capexEstimateLabel');
+        
+        // 20 year variables DOM
+        const omPercentInput = document.getElementById('omPercent');
+        const degradationRateInput = document.getElementById('degradationRate');
+        const inverterReplacementPercentInput = document.getElementById('inverterReplacementPercent');
+        const inverterReplacementYearInput = document.getElementById('inverterReplacementYear');
+        const evnEscalationRateInput = document.getElementById('evnEscalationRate');
+        
+        const cashflowTableDirect = document.getElementById('cashflowTableDirect').querySelector('tbody');
+        
+        // Output DOMs
+        const valCapex = document.getElementById('valCapex');
+        const valSolarGen = document.getElementById('valSolarGen');
+        const valSavingsYear1 = document.getElementById('valSavingsYear1');
+        const valPayback = document.getElementById('valPayback');
+        const valPaybackDesc = document.getElementById('valPaybackDesc');
+        const valRoofArea = document.getElementById('valRoofArea');
+        const valEvnDayAvg = document.getElementById('valEvnDayAvg');
+        const valLcoe = document.getElementById('valLcoe');
+        const valSavingsPerKwh = document.getElementById('valSavingsPerKwh');
+        const valSolarUsed = document.getElementById('valSolarUsed');
+        const valSolarWasted = document.getElementById('valSolarWasted');
+        const valWasteRate = document.getElementById('valWasteRate');
+        const valRoi = document.getElementById('valRoi');
+        const tilePaybackIcon = document.getElementById('tilePaybackIcon');
+
+        // State & Charts variables
+        let usageChartInstance = null;
+        let cashflowChartInstance = null;
+
+        // Auto calculate CAPEX estimate when Capacity changes
+        function updateCapexEstimate() {
+            const capacity = parseFloat(solarCapacityInput.value) || 0;
+            const estimatedCapex = capacity * 14000000; // 14 million / kWp
+            
+            // Format to show user
+            capexEstimateLabel.innerText = `Ước tính: ~${formatNumber(estimatedCapex)} VNĐ (14tr/kWp)`;
+            
+            // We only autofill if the value is empty or matches the old capacity estimate
+            const currentCapexRaw = solarCapexInput.value.replace(/,/g, '');
+            const currentCapex = parseFloat(currentCapexRaw) || 0;
+            const oldCapacity = capacity - 0.5; // simple guess
+            const oldEstimated = (oldCapacity > 0 ? oldCapacity : 0) * 14000000;
+            
+            if (currentCapex === 0 || currentCapex === oldEstimated) {
+                solarCapexInput.value = formatNumber(estimatedCapex);
+            }
+        }
+
+        // Format Input on Type
+        function formatInputWithCommas(inputElement) {
+            let value = inputElement.value.replace(/\D/g, '');
+            if (value === '') {
+                inputElement.value = '';
+                return;
+            }
+            inputElement.value = new Intl.NumberFormat('en-US').format(parseInt(value));
+        }
+
+        // Bind formatting event to solarCapexInput
+        solarCapexInput.addEventListener('input', (e) => {
+            formatInputWithCommas(e.target);
+        });
+
+        const LOCAL_STORAGE_KEY = 'solar_calc_inputs_v1';
+        const THEME_STORAGE_KEY = 'solar_calc_theme_v1';
+
+        function saveInputs() {
+            const inputs = {
+                evnNormalKwh: evnNormalKwhInput.value,
+                evnNormalPrice: evnNormalPriceInput.value,
+                evnPeakKwh: evnPeakKwhInput.value,
+                evnPeakPrice: evnPeakPriceInput.value,
+                evnOffpeakKwh: evnOffpeakKwhInput.value,
+                evnOffpeakPrice: evnOffpeakPriceInput.value,
+                dayPercent: dayPercentInput.value,
+                loadProfile: loadProfileSelect.value,
+                solarCapacity: solarCapacityInput.value,
+                solarCapex: solarCapexInput.value,
+                sunHoursPerYear: sunHoursPerYearInput.value,
+                omPercent: omPercentInput.value,
+                degradationRate: degradationRateInput.value,
+                inverterReplacementPercent: inverterReplacementPercentInput.value,
+                inverterReplacementYear: inverterReplacementYearInput.value,
+                evnEscalationRate: evnEscalationRateInput.value
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inputs));
+        }
+
+        function loadInputs() {
+            // Load theme first
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                themeBtn.innerHTML = savedTheme === 'light' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            }
+
+            const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!data) return;
+            try {
+                const inputs = JSON.parse(data);
+                if (inputs.evnNormalKwh !== undefined) evnNormalKwhInput.value = inputs.evnNormalKwh;
+                if (inputs.evnNormalPrice !== undefined) evnNormalPriceInput.value = inputs.evnNormalPrice;
+                if (inputs.evnPeakKwh !== undefined) evnPeakKwhInput.value = inputs.evnPeakKwh;
+                if (inputs.evnPeakPrice !== undefined) evnPeakPriceInput.value = inputs.evnPeakPrice;
+                if (inputs.evnOffpeakKwh !== undefined) evnOffpeakKwhInput.value = inputs.evnOffpeakKwh;
+                if (inputs.evnOffpeakPrice !== undefined) evnOffpeakPriceInput.value = inputs.evnOffpeakPrice;
+                
+                if (inputs.dayPercent !== undefined) {
+                    dayPercentInput.value = inputs.dayPercent;
+                    nightPercentInput.value = 100 - parseInt(inputs.dayPercent);
+                }
+                if (inputs.loadProfile !== undefined) loadProfileSelect.value = inputs.loadProfile;
+                if (inputs.solarCapacity !== undefined) solarCapacityInput.value = inputs.solarCapacity;
+                
+                if (inputs.solarCapex !== undefined) {
+                    const cleanCapex = parseFloat(inputs.solarCapex.toString().replace(/,/g, '')) || 0;
+                    solarCapexInput.value = formatNumber(cleanCapex);
+                }
+                
+                if (inputs.sunHoursPerYear !== undefined) sunHoursPerYearInput.value = inputs.sunHoursPerYear;
+                if (inputs.omPercent !== undefined) omPercentInput.value = inputs.omPercent;
+                if (inputs.degradationRate !== undefined) degradationRateInput.value = inputs.degradationRate;
+                if (inputs.inverterReplacementPercent !== undefined) inverterReplacementPercentInput.value = inputs.inverterReplacementPercent;
+                if (inputs.inverterReplacementYear !== undefined) inverterReplacementYearInput.value = inputs.inverterReplacementYear;
+                if (inputs.evnEscalationRate !== undefined) evnEscalationRateInput.value = inputs.evnEscalationRate;
+            } catch (e) {
+                console.error("Error loading saved inputs", e);
+            }
+        }
+
+        // Setup theme toggle
+        const themeBtn = document.getElementById('themeBtn');
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+            themeBtn.innerHTML = newTheme === 'light' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            
+            // Re-render charts to update grid color/labels if needed
+            runAnalysis();
+        });
+
+        // Day / Night percent synchronization
+        dayPercentInput.addEventListener('input', () => {
+            let val = parseInt(dayPercentInput.value) || 0;
+            if (val > 100) val = 100;
+            if (val < 0) val = 0;
+            dayPercentInput.value = val;
+            nightPercentInput.value = 100 - val;
+        });
+
+        // Trigger auto calculation when Capacity changes
+        solarCapacityInput.addEventListener('input', () => {
+            updateCapexEstimate();
+        });
+
+        // Format Numbers
+        function formatNumber(value, decimals = 0) {
+            return new Intl.NumberFormat('en-US', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: decimals 
+            }).format(value);
+        }
+
+        function formatCurrency(value) {
+            return formatNumber(value) + ' đ';
+        }
+
+        // Toast message generator
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--success);"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Tab switcher for Charts
+        window.switchTab = function(tabId, event) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.chart-box').forEach(box => box.style.display = 'none');
+            
+            // Activate current
+            const clickedBtn = event.currentTarget;
+            clickedBtn.classList.add('active');
+            document.getElementById(tabId).style.display = 'flex';
+        };
+
+        // CORE LOGIC CALCULATION
+        function runAnalysis() {
+            // Get inputs
+            const rawCapex = parseFloat(solarCapexInput.value.replace(/,/g, '')) || 0;
+            const inputs = {
+                evnNormalKwh: parseFloat(evnNormalKwhInput.value) || 0,
+                evnNormalPrice: parseFloat(evnNormalPriceInput.value) || 0,
+                evnPeakKwh: parseFloat(evnPeakKwhInput.value) || 0,
+                evnPeakPrice: parseFloat(evnPeakPriceInput.value) || 0,
+                evnOffpeakKwh: parseFloat(evnOffpeakKwhInput.value) || 0,
+                evnOffpeakPrice: parseFloat(evnOffpeakPriceInput.value) || 0,
+                
+                dayPercent: parseFloat(dayPercentInput.value) || 0,
+                nightPercent: parseFloat(nightPercentInput.value) || 0,
+                loadProfile: loadProfileSelect.value,
+                
+                solarCapacity: parseFloat(solarCapacityInput.value) || 0,
+                solarCapex: rawCapex,
+                sunHoursPerYear: parseFloat(sunHoursPerYearInput.value) || 0,
+                
+                // New 20 year values
+                omPercent: parseFloat(omPercentInput.value) || 0,
+                degradationRate: parseFloat(degradationRateInput.value) || 0,
+                inverterReplacementPercent: parseFloat(inverterReplacementPercentInput.value) || 0,
+                inverterReplacementYear: parseInt(inverterReplacementYearInput.value) || 0,
+                evnEscalationRate: parseFloat(evnEscalationRateInput.value) || 0
+            };
+
+            const totalEvnKwhMonth = inputs.evnNormalKwh + inputs.evnPeakKwh + inputs.evnOffpeakKwh;
+            const dayEvnKwhMonth = totalEvnKwhMonth * (inputs.dayPercent / 100);
+            
+            // 1. Diện tích mái yêu cầu: ~ 5.5 m2 per kWp
+            const roofArea = inputs.solarCapacity * 5.5;
+            
+            // 2. Sản lượng năm đầu (Tây Ninh)
+            const solarGenYear1 = inputs.solarCapacity * inputs.sunHoursPerYear;
+            const solarGenMonth = solarGenYear1 / 12;
+            
+            // 3. Tính tỷ lệ dư thừa lãng phí do bám tải (Zero Export)
+            // R = tỷ lệ sản lượng điện ĐMT sinh ra so với tải tiêu thụ ban ngày
+            const R = dayEvnKwhMonth > 0 ? (solarGenMonth / dayEvnKwhMonth) : 999;
+            
+            let wasteRate = 0;
+            if (inputs.loadProfile === 'noon') {
+                // Tải tập trung trưa (quá trình tự dùng cực cao)
+                if (R <= 0.5) {
+                    wasteRate = 0.01; 
+                } else if (R <= 1.2) {
+                    wasteRate = 0.01 + ((R - 0.5) / 0.7) * 0.19; // Lên tối đa 20% khi tỷ lệ = 1.2
+                } else {
+                    wasteRate = 1 - (0.96 / R); // Kịch trần tự dùng 96% tải ban ngày
+                }
+            } else if (inputs.loadProfile === 'steady') {
+                // Tải đều đặn
+                if (R <= 0.25) {
+                    wasteRate = 0.03;
+                } else if (R <= 1.0) {
+                    wasteRate = 0.03 + ((R - 0.25) / 0.75) * 0.32; // Lên tối đa 35% khi tỷ lệ = 1.0
+                } else {
+                    wasteRate = 1 - (0.65 / R); // Tự dùng tối đa 65% tải ban ngày
+                }
+            } else {
+                // Tải tập trung sáng & chiều (hao phí lớn vì buổi trưa ít xài điện)
+                if (R <= 0.15) {
+                    wasteRate = 0.05;
+                } else if (R <= 0.8) {
+                    wasteRate = 0.05 + ((R - 0.15) / 0.65) * 0.45; // Lên tối đa 50% khi tỷ lệ = 0.8
+                } else {
+                    wasteRate = 1 - (0.40 / R); // Tự dùng tối đa 40% tải ban ngày
+                }
+            }
+            
+            wasteRate = Math.max(0.01, Math.min(0.98, wasteRate)); // Giới hạn từ 1% đến 98%
+            
+            // Sản lượng sử dụng thực tế và sản lượng lãng phí
+            const solarUsedYear1 = solarGenYear1 * (1 - wasteRate);
+            const solarUsedMonth = solarGenMonth * (1 - wasteRate);
+            const solarWastedYear1 = solarGenYear1 * wasteRate;
+            
+            // 4. Giá điện trung bình ban ngày EVN
+            // Ước tính trong ngày phụ tải bao gồm toàn bộ Giờ Cao Điểm và một phần Giờ Bình Thường
+            const peakInDay = Math.min(dayEvnKwhMonth, inputs.evnPeakKwh);
+            const normalInDay = Math.max(0, dayEvnKwhMonth - peakInDay);
+            const dayEvnCost = (peakInDay * inputs.evnPeakPrice) + (normalInDay * inputs.evnNormalPrice);
+            const evnDayAvgPrice = dayEvnKwhMonth > 0 ? (dayEvnCost / dayEvnKwhMonth) : inputs.evnNormalPrice;
+
+            // 5. Tiết kiệm điện năm đầu tiên (ĐMT thay thế giá đắt trước)
+            const savePeakMonth = Math.min(solarUsedMonth, inputs.evnPeakKwh);
+            const saveNormalMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth), inputs.evnNormalKwh);
+            const saveOffpeakMonth = Math.min(Math.max(0, solarUsedMonth - savePeakMonth - saveNormalMonth), inputs.evnOffpeakKwh);
+            
+            const savingsMonth = (savePeakMonth * inputs.evnPeakPrice) + (saveNormalMonth * inputs.evnNormalPrice) + (saveOffpeakMonth * inputs.evnOffpeakPrice);
+            const savingsYear1 = savingsMonth * 12;
+
+            // 6. Mức tiết kiệm trên 1 kWh ĐMT sử dụng được
+            const savingsPerKwh = solarUsedYear1 > 0 ? (savingsYear1 / solarUsedYear1) : 0;
+            
+            // 7. Giá thành sản xuất 1 kWh ĐMT (LCOE) - Vòng đời 20 năm
+            // Khấu hao hiệu suất pin và chi phí bảo trì O&M, thay inverter động
+            const degradationRate = inputs.degradationRate / 100;
+            const evnPriceIncreaseRate = inputs.evnEscalationRate / 100;
+            const omPercent = inputs.omPercent / 100;
+            const inverterReplacement = inputs.solarCapex * (inputs.inverterReplacementPercent / 100);
+            const inverterReplacementYear = inputs.inverterReplacementYear;
+
+            let totalSolarUsed20Years = 0;
+            for (let t = 1; t <= 20; t++) {
+                totalSolarUsed20Years += solarUsedYear1 * Math.pow(1 - degradationRate, t - 1);
+            }
+            
+            const omCost20Years = inputs.solarCapex * omPercent * 19; // Vận hành 19 năm (năm 2 đến 20)
+            const totalLifeCycleCost = inputs.solarCapex + inverterReplacement + omCost20Years;
+            const lcoeUsed = totalSolarUsed20Years > 0 ? (totalLifeCycleCost / totalSolarUsed20Years) : 0;
+
+            // 8. Dòng tiền tích lũy và hoàn vốn
+            let cumulativeCashFlow = -inputs.solarCapex;
+            const cashFlows = [cumulativeCashFlow];
+            let paybackPeriod = -1;
+            
+            const detailedCashflows = [];
+            // Thêm năm 0 (đầu tư ban đầu)
+            detailedCashflows.push({
+                year: 0,
+                solarGen: 0,
+                savings: 0,
+                omCost: 0,
+                replacementCost: inputs.solarCapex,
+                netFlow: -inputs.solarCapex,
+                cumulativeFlow: -inputs.solarCapex
+            });
+            
+            for (let t = 1; t <= 20; t++) {
+                const degradation = Math.pow(1 - degradationRate, t - 1);
+                const evnEscalation = Math.pow(1 + evnPriceIncreaseRate, t - 1);
+                
+                const solarGenT = solarGenYear1 * degradation;
+                const savingsYearT = savingsYear1 * degradation * evnEscalation;
+                
+                let opCostT = t > 1 ? (inputs.solarCapex * omPercent) : 0;
+                let replaceCostT = t === inverterReplacementYear ? inverterReplacement : 0;
+                
+                const netCashFlowT = savingsYearT - opCostT - replaceCostT;
+                const prevCumulative = cumulativeCashFlow;
+                cumulativeCashFlow += netCashFlowT;
+                cashFlows.push(cumulativeCashFlow);
+                
+                detailedCashflows.push({
+                    year: t,
+                    solarGen: solarGenT,
+                    savings: savingsYearT,
+                    omCost: opCostT,
+                    replacementCost: replaceCostT,
+                    netFlow: netCashFlowT,
+                    cumulativeFlow: cumulativeCashFlow
+                });
+                
+                if (prevCumulative < 0 && cumulativeCashFlow >= 0 && paybackPeriod === -1) {
+                    const fraction = -prevCumulative / netCashFlowT;
+                    paybackPeriod = (t - 1) + fraction;
+                }
+            }
+            
+            const roi20Years = inputs.solarCapex > 0 ? ((cashFlows[20] + inputs.solarCapex) / inputs.solarCapex) * 100 : 0;
+
+            // RENDER OUTPUTS TO DOM
+            valCapex.innerText = formatCurrency(inputs.solarCapex);
+            valSolarGen.innerText = `${formatNumber(solarGenYear1)} kWh`;
+            valSavingsYear1.innerText = formatCurrency(savingsYear1);
+            
+            if (paybackPeriod > 0 && paybackPeriod <= 20) {
+                valPayback.innerText = `${formatNumber(paybackPeriod, 1)} năm`;
+                valPayback.style.color = 'var(--success)';
+                valPaybackDesc.innerText = `Hoàn vốn dự kiến ở năm thứ ${Math.ceil(paybackPeriod)}`;
+                tilePaybackIcon.style.color = 'var(--success)';
+                tilePaybackIcon.className = 'metric-icon success';
+            } else {
+                valPayback.innerText = 'Chưa hoàn vốn';
+                valPayback.style.color = 'var(--danger)';
+                valPaybackDesc.innerText = 'Hao phí quá cao hoặc CAPEX quá lớn';
+                tilePaybackIcon.className = 'metric-icon danger';
+            }
+
+            valRoofArea.innerText = `${formatNumber(roofArea, 1)} m²`;
+            valEvnDayAvg.innerText = `${formatNumber(evnDayAvgPrice, 0)} đ/kWh`;
+            valLcoe.innerText = `${formatNumber(lcoeUsed, 0)} đ/kWh`;
+            valSavingsPerKwh.innerText = `${formatNumber(savingsPerKwh, 0)} đ/kWh`;
+            valSolarUsed.innerText = `${formatNumber(solarUsedYear1)} kWh/năm`;
+            valSolarWasted.innerText = `${formatNumber(solarWastedYear1)} kWh/năm`;
+            valWasteRate.innerText = `${formatNumber(wasteRate * 100, 1)}%`;
+            valRoi.innerText = `${formatNumber(roi20Years, 0)}%`;
+
+            // RENDER CHARTS
+            renderUsageChart(solarUsedYear1, solarWastedYear1, inputs.solarCapacity * inputs.sunHoursPerYear);
+            renderCashflowChart(cashFlows);
+
+            // Render bảng dòng tiền trực tiếp
+            renderDirectTable(detailedCashflows);
+
+            // Save state to localStorage
+            saveInputs();
+        }
+
+        // Render direct cashflow table function
+        function renderDirectTable(detailedCashflows) {
+            cashflowTableDirect.innerHTML = '';
+            detailedCashflows.forEach(cf => {
+                const row = document.createElement('tr');
+                
+                const yearText = cf.year === 0 ? 'Năm 0 (Đầu tư)' : `Năm ${cf.year}`;
+                const isNegative = cf.cumulativeFlow < 0;
+                const cumulativeClass = isNegative ? 'danger-text' : 'success-text';
+                
+                row.innerHTML = `
+                    <td><strong>${yearText}</strong></td>
+                    <td style="text-align: right;">${cf.year === 0 ? '-' : formatNumber(cf.solarGen) + ' kWh'}</td>
+                    <td style="text-align: right;" class="${cf.savings > 0 ? 'success-text' : ''}">${cf.savings === 0 ? '-' : '+' + formatNumber(cf.savings)}</td>
+                    <td style="text-align: right; color: var(--text-secondary);">${cf.omCost === 0 ? '-' : '-' + formatNumber(cf.omCost)}</td>
+                    <td style="text-align: right; color: var(--text-danger);">${cf.replacementCost === 0 ? '-' : '-' + formatNumber(cf.replacementCost)}</td>
+                    <td style="text-align: right; font-weight: 600; color: ${cf.netFlow >= 0 ? 'var(--success)' : 'var(--danger)'}">${formatNumber(cf.netFlow)}</td>
+                    <td style="text-align: right;" class="${cumulativeClass}">${formatNumber(cf.cumulativeFlow)}</td>
+                `;
+                cashflowTableDirect.appendChild(row);
+            });
+        }
+
+        // CHARTS IMPLEMENTATION
+        function renderUsageChart(used, wasted, total) {
+            const ctx = document.getElementById('usageChart').getContext('2d');
+            
+            // Get text colors from CSS variables
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            const textPrimary = isDark ? '#f8fafc' : '#0f172a';
+            
+            if (usageChartInstance) {
+                usageChartInstance.destroy();
+            }
+            
+            usageChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Điện tự dùng thực tế', 'Điện dư thừa lãng phí'],
+                    datasets: [{
+                        data: [used, wasted],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textPrimary,
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tỉ Lệ Phân Phối Sản Lượng ĐMT',
+                            color: textPrimary,
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function renderCashflowChart(cashFlowData) {
+            const ctx = document.getElementById('cashflowChart').getContext('2d');
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            const textPrimary = isDark ? '#f8fafc' : '#0f172a';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+            if (cashflowChartInstance) {
+                cashflowChartInstance.destroy();
+            }
+
+            const labels = Array.from({length: 21}, (_, i) => `Năm ${i}`);
+            // Convert to million dong for cleaner chart values
+            const dataInMillions = cashFlowData.map(v => v / 1000000);
+
+            cashflowChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Dòng tiền lũy kế (Triệu VNĐ)',
+                        data: dataInMillions,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: dataInMillions.map(v => v >= 0 ? '#10b981' : '#ef4444'),
+                        pointBorderColor: '#fff',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Biểu Đồ Lũy Kế Dòng Tiền Hoàn Vốn (20 Năm)',
+                            color: textPrimary,
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textPrimary,
+                                font: {
+                                    family: 'Plus Jakarta Sans'
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textPrimary,
+                                font: {
+                                    family: 'Plus Jakarta Sans'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize and Bind events
+        document.getElementById('btnCalculate').addEventListener('click', () => {
+            runAnalysis();
+            showToast('Đã tính toán thành công các chỉ số!');
+        });
+
+        // Trigger initial calculation
+        window.addEventListener('load', () => {
+            loadInputs();
+            updateCapexEstimate();
+            runAnalysis();
+        });
+    </script>
+</body>
+</html>
