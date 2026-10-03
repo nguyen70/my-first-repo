@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cẩm Nang & Bảng Mã Màu AutoCAD Chuẩn (Nền Đen & Trắng)</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cadDark: '#121921',
+            cadCanvas: '#1e2836',
+            cadBorder: '#2d3b4e',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Cad Grid Pattern simulation */
+    .cad-grid-dark {
+      background-color: #1a202c;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0),
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 20px 20px;
+    }
+
+    .cad-grid-light {
+      background-color: #ffffff;
+      background-image: 
+        radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 0),
+        linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 20px 20px;
+    }
+
+    .toast-animate {
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-mx auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2.5 rounded-xl shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-drafting-compass text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-tight leading-tight">AutoCAD Color Master</h1>
+          <p class="text-xs text-slate-400">Chuẩn Phối Màu Nền Đen & Trắng</p>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-1">
+        <a href="#simulator" class="px-3 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition-all">
+          <i class="fa-solid fa-sliders mr-1.5 text-cyan-400"></i>Mô Phỏng Mô Hình
+        </a>
+        <a href="#palettes" class="px-3 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition-all">
+          <i class="fa-solid fa-palette mr-1.5 text-cyan-400"></i>Bảng Màu Khuyên Dùng
+        </a>
+        <a href="#layers" class="px-3 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition-all">
+          <i class="fa-solid fa-layer-group mr-1.5 text-cyan-400"></i>Cấu Trúc Layer
+        </a>
+        <a href="#ctb-guide" class="px-3 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition-all">
+          <i class="fa-solid fa-print mr-1.5 text-cyan-400"></i>Cấu Hình CTB In
+        </a>
+      </nav>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="scrollToSection('simulator')" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2">
+          <i class="fa-solid fa-eye"></i>
+          <span>Thử Màu Trực Tiếp</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden transform translate-y-10 opacity-0 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 toast-animate">
+    <div id="toast-icon" class="text-emerald-400">
+      <i class="fa-solid fa-circle-check text-lg"></i>
+    </div>
+    <span id="toast-msg" class="text-sm font-medium">Đã sao chép mã màu!</span>
+  </div>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-4">
+          <i class="fa-solid fa-circle-info text-cyan-400"></i> Nguyên Tắc Thiết Kế CAD
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          Giải Pháp Phối Màu Tối Ưu Cho Mọi Không Gian AutoCAD
+        </h2>
+        <p class="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+          Vấn đề phổ biến nhất của Kỹ sư & Kiến trúc sinh là nét vẽ rất đẹp trên nền đen (Model Space) nhưng lại <span class="text-amber-400 font-semibold">tàng hình hoặc chói mắt</span> khi chuyển sang nền trắng (Layout / In ấn). Hãy khám phá bảng màu và công cụ thử nghiệm tương tác bên dưới!
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-4">
+          <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-check text-emerald-400"></i> Tự động tương thích 2 nền
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-check text-emerald-400"></i> Không bị chói/mờ mắt
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-check text-emerald-400"></i> Xuất bản in sắc nét (.CTB)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: INTERACTIVE SIMULATOR -->
+    <section id="simulator" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-display text-cyan-400"></i>
+            Trình Mô Phỏng Hiển Thị Nền Đen vs Nền Trắng
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">So sánh độ rõ nét của bản vẽ CAD khi đổi môi trường hiển thị real-time</p>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start md:self-auto">
+          <button id="view-split" onclick="setSimMode('split')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-800 shadow transition-all">
+            <i class="fa-solid fa-columns mr-1"></i> So Sánh Song Song
+          </button>
+          <button id="view-dark" onclick="setSimMode('dark')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+            <i class="fa-solid fa-moon mr-1"></i> Model (Đen)
+          </button>
+          <button id="view-light" onclick="setSimMode('light')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+            <i class="fa-solid fa-sun mr-1"></i> Layout (Trắng)
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Simulator Viewports Container -->
+      <div id="sim-viewport-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4 transition-all duration-300">
+        
+        <!-- Dark Viewport (Model) -->
+        <div id="box-dark" class="rounded-xl border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col">
+          <div class="bg-slate-950 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-xs font-mono text-slate-300">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+              MODEL SPACE (Nền Đen - #1E202C)
+            </span>
+            <span class="text-slate-500">AutoCAD Visualizer</span>
+          </div>
+          
+          <div class="cad-grid-dark relative h-80 p-6 flex flex-col justify-between overflow-hidden">
+            <!-- Simulated Drawing Elements -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid lines simulation -->
+              <line x1="10%" y1="20%" x2="90%" y2="20%" stroke="#00a0dc" stroke-dasharray="8 4" stroke-width="1.5"/>
+              <line x1="20%" y1="10%" x2="20%" y2="90%" stroke="#00a0dc" stroke-dasharray="8 4" stroke-width="1.5"/>
+              <!-- Wall Outline -->
+              <rect x="25%" y="28%" width="50%" height="48%" fill="none" stroke="#28b463" stroke-width="3" />
+              <!-- Inner Furniture -->
+              <rect x="30%" y="35%" width="20%" height="20%" fill="none" stroke="#e6821e" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <circle cx="60%" cy="50%" r="22" fill="none" stroke="#dc3232" stroke-width="1.5" />
+              <path d="M 60% 30% L 60% 70%" stroke="#dc3232" stroke-width="1.5" />
+            </svg>
+
+            <!-- CAD Floating Labels inside viewport -->
+            <div class="relative z-10 flex flex-col justify-between h-full">
+              <div class="flex justify-between items-start">
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded px-2.5 py-1 backdrop-blur text-xs font-mono">
+                  <span class="text-slate-400">Layer:</span> <span id="label-layer-1" class="text-white font-bold">0_TUONG_THAY</span>
+                </div>
+                <div class="text-[11px] font-mono px-2 py-0.5 rounded bg-black/60 text-slate-300 border border-slate-700">
+                  X: 1240.52 Y: 890.15
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="text-xs font-mono font-bold" id="sample-text-dark" style="color: #ffffff;">
+                  TEXT TIÊU ĐỀ BẢN VẼ (COLOR 7 / WHITE)
+                </div>
+                <div class="text-[11px] font-mono" id="sample-dim-dark" style="color: #dc3232;">
+                  DIMENSION: 4,500 mm (RGB: 220, 50, 50)
+                </div>
+                <div class="text-[11px] font-mono" id="sample-center-dark" style="color: #00a0dc;">
+                  CENTER LINE: AXIS 1-A (RGB: 0, 160, 220)
+                </div>
+                <div class="text-[11px] font-mono" id="sample-bad-dark" style="color: #ffff00;">
+                  ⚠️ Cảnh báo màu Vàng ACI 2 (Xem nền trắng để thấy khác biệt)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Light Viewport (Layout / Print) -->
+        <div id="box-light" class="rounded-xl border border-slate-300/80 overflow-hidden shadow-2xl flex flex-col">
+          <div class="bg-slate-100 px-4 py-2 border-b border-slate-300 flex justify-between items-center text-xs font-mono text-slate-700">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+              LAYOUT / PAPER SPACE (Nền Trắng - #FFFFFF)
+            </span>
+            <span class="text-slate-500">In Ấn / Plot Preview</span>
+          </div>
+
+          <div class="cad-grid-light relative h-80 p-6 flex flex-col justify-between overflow-hidden">
+            <!-- Simulated Drawing Elements on White -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid lines simulation -->
+              <line x1="10%" y1="20%" x2="90%" y2="20%" stroke="#00a0dc" stroke-dasharray="8 4" stroke-width="1.5"/>
+              <line x1="20%" y1="10%" x2="20%" y2="90%" stroke="#00a0dc" stroke-dasharray="8 4" stroke-width="1.5"/>
+              <!-- Wall Outline -->
+              <rect x="25%" y="28%" width="50%" height="48%" fill="none" stroke="#28b463" stroke-width="3" />
+              <!-- Inner Furniture -->
+              <rect x="30%" y="35%" width="20%" height="20%" fill="none" stroke="#e6821e" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <circle cx="60%" cy="50%" r="22" fill="none" stroke="#dc3232" stroke-width="1.5" />
+              <path d="M 60% 30% L 60% 70%" stroke="#dc3232" stroke-width="1.5" />
+            </svg>
+
+            <!-- CAD Floating Labels inside light viewport -->
+            <div class="relative z-10 flex flex-col justify-between h-full">
+              <div class="flex justify-between items-start">
+                <div class="bg-white/90 border border-slate-300 rounded px-2.5 py-1 shadow-sm text-xs font-mono">
+                  <span class="text-slate-500">Layer:</span> <span id="label-layer-2" class="text-slate-900 font-bold">0_TUONG_THAY</span>
+                </div>
+                <div class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-800 border border-slate-300">
+                  Tỷ lệ: 1/100
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <!-- Color 7 automatically turns Black on White Background in CAD! -->
+                <div class="text-xs font-mono font-bold" id="sample-text-light" style="color: #000000;">
+                  TEXT TIÊU ĐỀ BẢN VẼ (COLOR 7 TỰ ĐẢO MÀU THÀNH ĐEN)
+                </div>
+                <div class="text-[11px] font-mono" id="sample-dim-light" style="color: #dc3232;">
+                  DIMENSION: 4,500 mm (Rõ ràng trên cả 2 nền)
+                </div>
+                <div class="text-[11px] font-mono" id="sample-center-light" style="color: #00a0dc;">
+                  CENTER LINE: AXIS 1-A (Xanh Cyan trầm không lóa)
+                </div>
+                <div class="text-[11px] font-mono bg-yellow-100/80 px-1 rounded" id="sample-bad-light" style="color: #ffff00;">
+                  ❌ MÀU VÀNG ACI 2 CỰC KỲ MỜ & KHÓ ĐỌC TRÊN NỀN TRẮNG
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: RECOMMENDED PALETTES TABLE -->
+    <section id="palettes" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-swatchbook text-cyan-400"></i>
+          Bảng Mã Màu Đa Dụng (Được Khuyên Dùng Nổi Bật)
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Các tone màu đạt tiêu chuẩn độ tương phản cao trên cả nền đen lẫn nền trắng</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="palette-cards-container">
+        <!-- Cards generated dynamically or structured via JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: STANDARD LAYER CONFIGURATION TABLE -->
+    <section id="layers" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-cyan-400"></i>
+            Hệ Thống Thiết Lập Layer Chuẩn Cho Dự Án
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Gợi ý tên layer, mã màu RGB/ACI và nét in (Lineweight) tương ứng</p>
+        </div>
+        <button onclick="copyAllLayersTable()" class="self-start sm:self-auto px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-cyan-300 rounded-lg transition-all flex items-center gap-2">
+          <i class="fa-solid fa-copy"></i>
+          Sao Chép Danh Sách Layer
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 bg-slate-950/50 uppercase tracking-wider text-[11px]">
+              <th class="p-3 font-semibold">Tên Layer Chuẩn</th>
+              <th class="p-3 font-semibold">Mục Đích Sử Dụng</th>
+              <th class="p-3 font-semibold">Mã Màu (ACI / RGB)</th>
+              <th class="p-3 font-semibold">Nền Đen</th>
+              <th class="p-3 font-semibold">Nền Trắng</th>
+              <th class="p-3 font-semibold">Trọng Lượng Nét (MM)</th>
+            </tr>
+          </thead>
+          <tbody id="layer-table-body" class="divide-y divide-slate-800/60 font-mono">
+            <!-- Table rows populated via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 4: CTB PLOT STYLE SETUP GUIDE -->
+    <section id="ctb-guide" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-print text-cyan-400"></i>
+          Hướng Dẫn Cấu Hình File CTB Trong AutoCAD
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Cách biến tất cả các màu sắc tuyệt đẹp trên Model thành nét in đen sắc nét khi xuất PDF/Giấy</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition-all">
+          <div class="text-3xl font-extrabold text-slate-800 group-hover:text-cyan-500/20 transition-colors absolute top-3 right-4 select-none">
+            01
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+            1
+          </div>
+          <h3 class="text-base font-bold text-white">Mở Plot Style Table Editor</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Gõ lệnh <code class="bg-slate-950 px-1.5 py-0.5 rounded text-cyan-300">PLOT</code> hoặc <code class="bg-slate-950 px-1.5 py-0.5 rounded text-cyan-300">PAGESETUP</code>. Tại ô Plot Style Table, chọn <b class="text-slate-200">monochrome.ctb</b> hoặc nhấp biểu tượng sửa (Cái bút).
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition-all">
+          <div class="text-3xl font-extrabold text-slate-800 group-hover:text-cyan-500/20 transition-colors absolute top-3 right-4 select-none">
+            02
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+            2
+          </div>
+          <h3 class="text-base font-bold text-white">Cài Đặt Chế Độ Màu In</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Chọn các màu từ <code class="bg-slate-950 px-1.5 py-0.5 rounded text-cyan-300">Color 1</code> đến <code class="bg-slate-950 px-1.5 py-0.5 rounded text-cyan-300">Color 9</code>. Đặt thuộc tính <b class="text-slate-200">Properties -> Color = Black</b> để khi in tất cả đều ra màu đen đậm.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition-all">
+          <div class="text-3xl font-extrabold text-slate-800 group-hover:text-cyan-500/20 transition-colors absolute top-3 right-4 select-none">
+            03
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+            3
+          </div>
+          <h3 class="text-base font-bold text-white">Gán Trọng Lượng Nét (Lineweight)</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Chỉnh độ dày cho từng màu: Nét cắt (0.35 - 0.50mm), Nét thấy (0.18 - 0.25mm), Nét khuất / Tim trục (0.09 - 0.13mm). Lưu thành nét chuẩn cho công ty.
+          </p>
+        </div>
+      </div>
+
+      <!-- Pro-Tips Box -->
+      <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start gap-4">
+        <div class="p-3 bg-amber-500/20 text-amber-400 rounded-xl shrink-0">
+          <i class="fa-solid fa-lightbulb text-xl"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-sm font-bold text-amber-300">Mẹo Vàng Trong Quản Lý Bản Vẽ CAD:</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Nếu bạn muốn một đối tượng hiển thị màu sắc thật khi in (ví dụ: Logo công ty, Bảng chú thích màu), hãy gán cho đối tượng đó màu dạng <b class="text-white">True Color (RGB)</b> thay vì màu Index Color (ACI 1-255). AutoCAD sẽ giữ nguyên màu RGB đó và không bị đè bởi file .CTB!
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 border-t border-slate-800 mt-12 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-cubes text-cyan-400"></i>
+        <span>Cẩm Nang Kỹ Thuật AutoCAD - Hỗ Trợ Đội Ngũ Thiết Kế & Diễn Họa</span>
+      </div>
+      <div>
+        © 2026 AutoCAD Color Standards Guide.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Recommended Palettes Dataset
+    const paletteData = [
+      {
+        id: "color7",
+        name: "Color 7 (White/Black)",
+        aci: "7",
+        rgb: "255, 255, 255 / 0, 0, 0",
+        hex: "#FFFFFF",
+        use: "Khung tên, Khung bản vẽ, Text tiêu đề chính",
+        darkDesc: "Tự hiển thị màu TRẮNG tinh nổi bật trên Model",
+        lightDesc: "Tự biến thành màu ĐEN sắc nét trên Layout/Paper",
+        recommended: true,
+        bgClass: "bg-white",
+        textOnHex: "text-slate-900"
+      },
+      {
+        id: "red_crimson",
+        name: "Đỏ Trầm (Crimson Red)",
+        aci: "1 (Biến thể True Color)",
+        rgb: "220, 50, 50",
+        hex: "#DC3232",
+        use: "Kích thước (Dimension), Ký hiệu đường cắt",
+        darkDesc: "Rõ ràng, không bị chói mắt như đỏ thuần",
+        lightDesc: "Đỏ sẫm đậm nét, hoàn toàn không bị chìm",
+        recommended: true,
+        bgClass: "bg-[#DC3232]",
+        textOnHex: "text-white"
+      },
+      {
+        id: "cyan_deep",
+        name: "Xanh Cyan Trầm (Deep Cyan)",
+        aci: "4 (Biến thể True Color)",
+        rgb: "0, 160, 220",
+        hex: "#00A0DC",
+        use: "Trục (Center Line), Nét đứt (Hidden), Ký hiệu grid",
+        darkDesc: "Nổi bật trên nền tối, không gắt mắt",
+        lightDesc: "Tương phản tốt, tạo độ chuyên nghiệp",
+        recommended: true,
+        bgClass: "bg-[#00A0DC]",
+        textOnHex: "text-white"
+      },
+      {
+        id: "emerald_green",
+        name: "Xanh Lá Ngọc (Emerald Green)",
+        aci: "3 (Biến thể True Color)",
+        rgb: "40, 180, 100",
+        hex: "#28B463",
+        use: "Cột, Tường thấy, Nét cắt chính, Cây xanh",
+        darkDesc: "Dịu mắt hơn nhiều so với màu Green ACI 3 thuần",
+        lightDesc: "Hiển thị xanh đậm đà, dễ quan sát",
+        recommended: true,
+        bgClass: "bg-[#28B463]",
+        textOnHex: "text-white"
+      },
+      {
+        id: "amber_orange",
+        name: "Cam Đậm (Amber Orange)",
+        aci: "2 (Thay thế Vàng)",
+        rgb: "230, 130, 30",
+        hex: "#E6821E",
+        use: "Nội thất, Thiết bị, Nét phụ nét thấy",
+        darkDesc: "Giữ lại sự tươi sáng của màu Vàng",
+        lightDesc: "KHÔNG bị biến mất trên nền trắng như Vàng ACI 2",
+        recommended: true,
+        bgClass: "bg-[#E6821E]",
+        textOnHex: "text-white"
+      },
+      {
+        id: "neutral_gray",
+        name: "Xám Trung Tính (Color 8 / 9)",
+        aci: "8 / 251",
+        rgb: "140, 140, 140",
+        hex: "#8C8C8C",
+        use: "Hatch vật liệu, Nét mảnh phụ, Đột lỗ",
+        darkDesc: "Tránh gây nhiễu cho các đường nét chính",
+        lightDesc: "Tạo nét xám mờ phân cấp độ dày rực rỡ",
+        recommended: true,
+        bgClass: "bg-[#8C8C8C]",
+        textOnHex: "text-white"
+      }
+    ];
+
+    // CAD Layer Standard Table Data
+    const layerTableData = [
+      { name: "0_KHUNG_TEN", use: "Bìa, Khung bản vẽ, Block Attribute", aci: "Color 7", rgb: "Autoadapt", hex: "#FFFFFF", darkStyle: "color: #FFFFFF; font-weight: bold;", lightStyle: "color: #000000; font-weight: bold;", lw: "0.50 mm" },
+      { name: "1_TUONG_CAT", use: "Tường gạch cắt, Cột bê tông", aci: "Color 3 (Green)", rgb: "40, 180, 100", hex: "#28B463", darkStyle: "color: #28B463; font-weight: bold;", lightStyle: "color: #28B463; font-weight: bold;", lw: "0.35 mm" },
+      { name: "2_TUONG_THAY", use: "Nét thấy tường, Cửa sổ, Khung cửa", aci: "Color 2 (Yellow/Amber)", rgb: "230, 130, 30", hex: "#E6821E", darkStyle: "color: #E6821E;", lightStyle: "color: #E6821E;", lw: "0.20 mm" },
+      { name: "3_DIMENSION", use: "Đường kích thước, Đường dóng", aci: "Color 1 (Red)", rgb: "220, 50, 50", hex: "#DC3232", darkStyle: "color: #DC3232;", lightStyle: "color: #DC3232;", lw: "0.15 mm" },
+      { name: "4_TEXT_MAI", use: "Ghi chú, Tên phòng, Cao độ", aci: "Color 7 / Crimson", rgb: "255, 255, 255", hex: "#FFFFFF", darkStyle: "color: #FFFFFF;", lightStyle: "color: #000000;", lw: "0.20 mm" },
+      { name: "5_AXIS_CENTER", use: "Đường trục tọa độ, Tim cột", aci: "Color 4 (Cyan)", rgb: "0, 160, 220", hex: "#00A0DC", darkStyle: "color: #00A0DC;", lightStyle: "color: #00A0DC;", lw: "0.13 mm" },
+      { name: "6_NET_KHUAT", use: "Dầm ẩn, Đường khuất bên dưới", aci: "Color 6 (Magenta)", rgb: "200, 70, 200", hex: "#C846C8", darkStyle: "color: #C846C8;", lightStyle: "color: #C846C8;", lw: "0.13 mm" },
+      { name: "7_HATCH_VATLIEU", use: "Tô vật liệu gạch, Bê tông, Cỏ", aci: "Color 8 / 253", rgb: "140, 140, 140", hex: "#8C8C8C", darkStyle: "color: #8C8C8C;", lightStyle: "color: #71717A;", lw: "0.09 mm" }
+    ];
+
+    // Render Recommended Color Cards
+    function renderPalettes() {
+      const container = document.getElementById('palette-cards-container');
+      container.innerHTML = paletteData.map(item => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-lg group">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">ACI: ${item.aci}</span>
+              <button onclick="copyToClipboard('${item.rgb}', 'Mã RGB: ${item.rgb}')" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 transition-colors">
+                <i class="fa-regular fa-copy"></i>
+                <span class="font-mono">${item.rgb}</span>
+              </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl shadow-md ${item.bgClass} flex items-center justify-center border border-slate-700/50 shrink-0">
+                <span class="text-xs font-bold ${item.textOnHex}">CAD</span>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">${item.name}</h3>
+                <p class="text-xs text-slate-400">${item.use}</p>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-2 text-xs">
+              <div class="flex items-start gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-400 mt-1 shrink-0"></span>
+                <span class="text-slate-300"><b class="text-slate-100">Nền đen:</b> ${item.darkDesc}</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400 mt-1 shrink-0"></span>
+                <span class="text-slate-300"><b class="text-slate-100">Nền trắng:</b> ${item.lightDesc}</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="copyToClipboard('${item.rgb}', 'Đã chép mã RGB: ${item.rgb}')" class="w-full py-2 bg-slate-800 hover:bg-cyan-600 hover:text-white text-slate-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-code"></i> Sao Chép Mã Màu RGB
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Render Layer Standards Table
+    function renderLayerTable() {
+      const tbody = document.getElementById('layer-table-body');
+      tbody.innerHTML = layerTableData.map(row => `
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-3 font-bold text-cyan-300">${row.name}</td>
+          <td class="p-3 text-slate-300 font-sans">${row.use}</td>
+          <td class="p-3 text-slate-400">${row.aci} <br/><span class="text-[11px] text-slate-500">RGB: ${row.rgb}</span></td>
+          <td class="p-3 bg-slate-950/80"><span style="${row.darkStyle}">${row.name}</span></td>
+          <td class="p-3 bg-white/90"><span style="${row.lightStyle}">${row.name}</span></td>
+          <td class="p-3 text-slate-300 font-semibold">${row.lw}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Mode Switcher for CAD Visualizer
+    function setSimMode(mode) {
+      const boxDark = document.getElementById('box-dark');
+      const boxLight = document.getElementById('box-light');
+      const btnSplit = document.getElementById('view-split');
+      const btnDark = document.getElementById('view-dark');
+      const btnLight = document.getElementById('view-light');
+
+      // Reset active button styles
+      [btnSplit, btnDark, btnLight].forEach(btn => {
+        btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all";
+      });
+
+      if (mode === 'split') {
+        btnSplit.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-800 shadow transition-all";
+        boxDark.classList.remove('hidden');
+        boxLight.classList.remove('hidden');
+      } else if (mode === 'dark') {
+        btnDark.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-800 shadow transition-all";
+        boxDark.classList.remove('hidden');
+        boxLight.classList.add('hidden');
+      } else if (mode === 'light') {
+        btnLight.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-800 shadow transition-all";
+        boxDark.classList.add('hidden');
+        boxLight.classList.remove('hidden');
+      }
+    }
+
+    // Copy to Clipboard with custom Toast Notification
+    function copyToClipboard(text, customMessage) {
+      const tempInput = document.createElement("textarea");
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      showToast(customMessage || "Đã sao chép vào bộ nhớ tạm!");
+    }
+
+    // Toast Alert
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = message;
+
+      toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 2500);
+    }
+
+    // Copy Layer Table formatted text
+    function copyAllLayersTable() {
+      let tableText = "TÊN LAYER\tMỤC ĐÍCH\tMÃ MÀU\tLINEWEIGHT\n";
+      layerTableData.forEach(row => {
+        tableText += `${row.name}\t${row.use}\t${row.rgb}\t${row.lw}\n`;
+      });
+      copyToClipboard(tableText, "Đã sao chép bảng layer chuẩn vào Clipboard!");
+    }
+
+    // Scroll to section helper
+    function scrollToSection(id) {
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // Initial load
+    window.onload = function() {
+      renderPalettes();
+      renderLayerTable();
+    };
+  </script>
+</body>
+</html>
