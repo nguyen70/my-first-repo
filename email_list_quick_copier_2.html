@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công Cụ Copy Email Theo Thứ Tự</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="h-full font-sans antialiased bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-20 px-4 py-3 sm:px-6">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xl shadow-lg shadow-indigo-500/10">
+          <i class="fa-solid fa-at"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white leading-tight">Copy Email Sequencer</h1>
+          <p class="text-xs text-slate-400">Công cụ copy email theo thứ tự nhanh chóng</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button id="toggleSettingsBtn" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center space-x-2">
+          <i class="fa-solid fa-sliders"></i>
+          <span class="hidden sm:inline">Cấu hình / Danh sách</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center my-4">
+    
+    <!-- Toast Notification container -->
+    <div id="toast" class="fixed top-20 right-4 sm:right-6 z-50 transform translate-y-[-20px] opacity-0 transition-all duration-300 pointer-events-none">
+      <div class="bg-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 text-sm border border-emerald-400">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toastMsg">Đã copy vào bộ nhớ tạm!</span>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+      
+      <!-- Top Bar in Card: Index Indicators -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center space-x-3">
+          <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Chỉ số hiện tại (Index):</span>
+          <div class="flex items-baseline space-x-1">
+            <span id="currentIndexDisplay" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 font-mono">1</span>
+            <span class="text-slate-500 text-sm font-mono">/</span>
+            <span id="totalCountDisplay" class="text-slate-400 font-mono text-base sm:text-lg">300</span>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="w-full sm:w-48 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/50">
+          <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full transition-all duration-300 w-0"></div>
+        </div>
+      </div>
+
+      <!-- Email Display Box -->
+      <div class="space-y-2">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          Email được chọn
+        </label>
+        <div id="emailContainer" class="relative group cursor-pointer" onclick="copyCurrentEmail()">
+          <div class="w-full bg-slate-950/80 border-2 border-indigo-500/40 group-hover:border-indigo-400 rounded-xl p-4 sm:p-6 text-center font-mono text-lg sm:text-2xl text-cyan-300 font-semibold break-all transition-all shadow-inner min-h-[72px] flex items-center justify-center">
+            <span id="emailText" class="select-all">Loading...</span>
+          </div>
+          <div class="absolute inset-y-0 right-3 flex items-center pr-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            <span class="text-xs bg-indigo-600/80 text-white px-2 py-1 rounded shadow">Nhấn để Copy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <!-- Previous Button -->
+        <button id="prevBtn" onclick="prevEmail()" class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-slate-200 font-semibold rounded-xl border border-slate-700 transition flex items-center justify-center space-x-2 shadow-lg">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Trước (Prev)</span>
+        </button>
+
+        <!-- Copy Button -->
+        <button id="copyBtn" onclick="copyCurrentEmail()" class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.98] text-white font-bold rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/25 border border-indigo-400/30">
+          <i id="copyIcon" class="fa-regular fa-copy text-lg"></i>
+          <span id="copyBtnText">COPY EMAIL</span>
+        </button>
+
+        <!-- Next Button -->
+        <button id="nextBtn" onclick="nextEmail()" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/20 border border-emerald-400/30">
+          <span>Tiếp theo (Next)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Direct Jump & Settings Controls -->
+      <div class="pt-4 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Jump to Index Form -->
+        <div class="bg-slate-950/40 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+          <label for="jumpIndexInput" class="text-xs font-medium text-slate-300 whitespace-nowrap flex items-center space-x-1.5">
+            <i class="fa-solid fa-magnifying-glass text-indigo-400"></i>
+            <span>Nhập Index để xem:</span>
+          </label>
+          <div class="flex items-center space-x-2 w-full max-w-[180px]">
+            <input type="number" id="jumpIndexInput" min="1" max="300" placeholder="1" 
+                   class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:outline-none rounded-lg px-3 py-1.5 text-center text-sm font-mono text-slate-100">
+            <button onclick="jumpToInputIndex()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition whitespace-nowrap">
+              Nhảy
+            </button>
+          </div>
+        </div>
+
+        <!-- Auto Copy Toggle & Options -->
+        <div class="bg-slate-950/40 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="autoCopyToggle" class="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer" checked>
+            <label for="autoCopyToggle" class="text-xs font-medium text-slate-300 cursor-pointer select-none">
+              Tự động Copy khi bấm Next / Prev
+            </label>
+          </div>
+          <span class="text-[10px] text-slate-500 bg-slate-900 px-2 py-1 rounded border border-slate-800 hidden sm:inline">Phím tắt: Enter / ➔</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Drawer / Modal Settings (Hidden by default) -->
+    <div id="settingsPanel" class="hidden glass-card rounded-2xl p-6 shadow-2xl mt-6 space-y-4 border border-slate-700">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <i class="fa-solid fa-gear text-indigo-400"></i>
+          <span>Cấu Hình Tên Miền & Danh Sách Data</span>
+        </h3>
+        <button onclick="toggleSettings()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Domain Config -->
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-400">Đuôi email (Domain suffix):</label>
+          <div class="flex items-center space-x-2">
+            <select id="domainSelect" onchange="handleDomainChange()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 w-full">
+              <option value="">(Không thêm đuôi - Dùng nguyên bản)</option>
+              <option value="@gmail.com">@gmail.com</option>
+              <option value="@outlook.com">@outlook.com</option>
+              <option value="@hotmail.com">@hotmail.com</option>
+              <option value="@yahoo.com">@yahoo.com</option>
+              <option value="custom">Tuỳ chỉnh...</option>
+            </select>
+            <input type="text" id="customDomainInput" placeholder="@domain.com" class="hidden bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 w-full" oninput="updateEmailDisplay()">
+          </div>
+        </div>
+
+        <!-- Mode Indexing -->
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-400">Kiểu hiển thị Index:</label>
+          <select id="indexBaseSelect" onchange="handleIndexBaseChange()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 w-full">
+            <option value="1">Bắt đầu từ 1 (1 - N) - Khuyên dùng</option>
+            <option value="0">Bắt đầu từ 0 (0 - N-1) - Lập trình viên</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Custom Raw Data Input -->
+      <div class="space-y-2 pt-2">
+        <div class="flex justify-between items-center">
+          <label class="block text-xs font-semibold text-slate-400">Danh sách dữ liệu gốc (Phân tách bởi dấu phẩy hoặc xuống dòng):</label>
+          <button onclick="resetToDefaultData()" class="text-xs text-indigo-400 hover:underline">Khôi phục danh sách 300 mẫu ban đầu</button>
+        </div>
+        <textarea id="rawTextarea" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 custom-scrollbar"></textarea>
+        <div class="flex justify-end">
+          <button onclick="applyCustomData()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+            Áp dụng dữ liệu mới
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Keyboard Shortcuts Helper -->
+    <div class="mt-6 text-center text-xs text-slate-500 flex items-center justify-center space-x-4">
+      <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-300">➔</kbd> Hoặc <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-300">Enter</kbd> : Next</span>
+      <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-300">⬅</kbd> : Prev</span>
+      <span><kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-300">Space</kbd> : Copy</span>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/60 py-3 text-center text-xs text-slate-500">
+    Email Sequencer App &bull; Thiết kế hỗ trợ công việc copy dữ liệu nhanh
+  </footer>
+
+  <script>
+    /* Default array of 300 usernames provided by user */
+    const DEFAULT_EMAILS = [ 'Evelyn001785', 'Blanche002313', 'Vincent008915', 'Howard008964', 'Angus002762', 'Michael004649', 'Nolan008945', 'Diane004682', 'Louise009995', 'Hugo009601', 'Yves000929', 'Anais004045', 'Bruno008157', 'Sarah008060', 'Clement005931', 'Perrine001110', 'Beckett002648', 'Fabien000324', 'Justin004878', 'Tobias003797', 'Paisley000310', 'Amelia008524', 'Paul002453', 'Thea006987', 'Adele000966', 'Maxime003438', 'Margaux007833', 'Capucine005815', 'Roy007332', 'Olivier008296', 'Lincoln008257', 'Bryce007087', 'Renee007905', 'Noelle003937', 'Aria007859', 'Thierry001226', 'Francois006246', 'Penelope007078', 'Laurel006712', 'Fabrice009446', 'Samuel009675', 'Theo000498', 'Ralph005713', 'Brooklyn003862', 'Lucien001427', 'Isabelle008701', 'Nicole005757', 'Freya009243', 'Riley002610', 'Megane009165', 'Gerard005077', 'Fiona002668', 'Suzanne002458', 'Mireille004062', 'Emmett002238', 'Eleanor008849', 'Amandine008587', 'Lucas006054', 'Iris004169', 'Christina004468', 'Layla009962', 'Jenna009978', 'Yanis001343', 'Mikael003794', 'Peter004509', 'Madeleine000049', 'Adam007471', 'Aiden005949', 'Samantha006624', 'Jordan004552', 'Didier005341', 'Benjamin002213', 'Charlie007179', 'Jacques000400', 'Erica001394', 'Therese002514', 'Gregory005535', 'Nancy006662', 'Laurent006165', 'Yara008983', 'Cameron009247', 'Aaron007941', 'Wesley004879', 'Stuart005360', 'Cyril004981', 'Theodore002738', 'Philippe008091', 'Sean004577', 'Olive009109', 'Kieran003649', 'Coralie006997', 'Emilie002340', 'Jules005135', 'Cedric008152', 'Scott005631', 'Frances009836', 'Sylvie001239', 'Benedicte009056', 'Maeve006873', 'Nora006732', 'Genevieve003678', 'Lucy005680', 'Marilou009641', 'Michel002747', 'Ian009492', 'Elisabeth004528', 'Julia001388', 'Phoebe008322', 'Leonie006778', 'Lea002125', 'Miles009046', 'Alan003856', 'Melanie003227', 'Pauline007034', 'Amelie002688', 'Remi007479', 'Timothee002570', 'Remy004534', 'Chase009762', 'Roger005004', 'Leon002865', 'Delilah009871', 'Dorothee008618', 'Serge004010', 'Avery004348', 'Ludovic009591', 'Josette002649', 'Maya008883', 'Stephane005956', 'Paige004998', 'Blake008830', 'Marie001297', 'Juniper002573', 'Tristan002398', 'Eric004918', 'James007470', 'Gordon004140', 'Veronica005007', 'Edmond007924', 'Gloria004683', 'Lila006479', 'Evangeline004964', 'Heather008339', 'Malcolm001608', 'Ivy006072', 'Ava005409', 'Floyd006542', 'Sabine001463', 'Agathe006288', 'Patricia003815', 'Frederic002239', 'Loic005941', 'Estelle000367', 'Solene005623', 'Frank005011', 'Silas009165', 'Berenice000255', 'Callum006122', 'Wendy007837', 'Arnaud007844', 'Natalie003188', 'Veronique009824', 'Jade006814', 'Hamish004821', 'Raphael005688', 'Nathan004488', 'Naomi002585', 'Olivia002084', 'Isaac002696', 'Zoe004086', 'Sabrina006437', 'Eve003244', 'Jasper006048', 'Rose009766', 'Kaia000674', 'Victoria005801', 'Damien004613', 'Dominique005376', 'Daphne008773', 'Noemie004631', 'Joyce002868', 'Bruce008056', 'Grant007061', 'Willow003815', 'Harper001554', 'Owen006905', 'Ursule001407', 'Zoey007161', 'Jacob000156', 'Simone002229', 'Guillaume002890', 'Oliver000708', 'Ines001787', 'Brianna001417', 'Astrid009080', 'Mathieu003456', 'Monica009471', 'Joel000890', 'Antoine000786', 'Noel004748', 'Ophelie003991', 'Danielle003054', 'Benoit007057', 'Daniel004302', 'Monique006913', 'Colton006906', 'Beatrix000797', 'Alexander007723', 'Elaine007664', 'Raymond009891', 'Amaury003335', 'Maelle009942', 'Wade000297', 'Rowan007005', 'Matheo003020', 'Larry003522', 'Pascal004214', 'Dylan004064', 'Joshua003577', 'Arianne001525', 'Eliane001227', 'Ariane002381', 'Stanley009250', 'Finn007181', 'Irene007791', 'Noah001840', 'Roland001398', 'Sienna002678', 'Bertrand000909', 'Charlotte004082', 'George006275', 'Talia007936', 'Fleur009045', 'Laetitia001942', 'Fanny004307', 'Anthony006725', 'Grayson009848', 'Elliott004060', 'Douglas002780', 'Carter001825', 'Brigitte000409', 'Oscar009854', 'Isabel009459', 'Spencer005272', 'Rachel008693', 'Yannick001483', 'Seamus008037', 'Jeanne009260', 'Sophia000591', 'Madison008526', 'Uma002777', 'Zack002151', 'Catherine002075', 'Everett007331', 'Margot007436', 'Aurelie003098', 'Laurie002996', 'Vanessa009469', 'Brandon004468', 'William000535', 'Sadie008647', 'Valerie003059', 'Florent005016', 'Mason002530', 'Justine009934', 'Cora004993', 'Tyler001046', 'Adriana001771', 'Kara004381', 'Neil009564', 'Aurelien000041', 'Graham001707', 'Brendan006784', 'Philip008482', 'Daisy004214', 'Easton009720', 'Georgia001884', 'Faith005481', 'Trent004776', 'Florence002460', 'Pierre000121', 'Luna009845', 'Craig001475', 'Felix009066', 'Norman008081', 'Christiane004659', 'Maurice009750', 'Frederick004306', 'Leo004202', 'Ethan009925', 'Arthur000400', 'Hailey009351', 'Manon002621', 'Juliette004740', 'Edouard008489', 'Jeremy007594', 'Diana002406', 'Laura006361', 'Aurora005933', 'Jean004314', 'Dennis008091', 'Thomas009285', 'Edgar008905', 'Robert000668', 'Piper003441', 'Audrey008506', 'Wallace001122', 'Zachary005915', 'Josephine000438', 'Sophie001201', 'Cody001644', 'Eli003850', 'Logan006911', 'Hudson001361', 'Kelsey004741', 'Sebastien006703', 'Kaitlyn005161', 'Corinne003886', 'Isla008272', 'Victorien004201', 'Frederique004103', 'Steven000111', 'Camille000889', 'Terrence005727', 'Evan005718', 'Xavier006607', 'Viviane001167', 'Elijah009069', 'Matteo007769', 'Gilles003280', 'Laurence003801', 'Jerome000445', 'Kevin009077', 'Christophe005640', 'Wren004857', 'Oceane007451', 'Emily004148', 'Nicolas002308', 'Charles007852', 'Scarlett000696', 'Valentin009927', 'Gabrielle003513', 'Trevor007018', 'Bethany004659', 'Russell002551', 'Tessa001846', 'Marcus005084', 'Martin002461', 'Ximena008665', 'Stephanie008310', 'Cloe000475', 'Ross001918', 'Constance006500', 'Nathalie001503', 'Emrick003829', 'Ada003748', 'Zane008639', 'Julianne005798', 'Elise007120', 'Gael008052', 'Elodie002146', 'Lucie006698', 'Anouk009893', 'Austin005722', 'Megan002404', 'Eden000082', 'Katherine006536', 'Edward000743', 'Levi002046', 'Joseph002372', 'Lily006469', 'Delphine007717', 'Mila007414', 'Maude006399', 'Jacqueline003676', 'Stella009235', 'Tatiana003594', 'Mathis009362', 'Emma002430', 'Mia009967', 'Sandrine008160', 'Celine007797', 'Yvette004730', 'Etienne002818', 'Eloise004612', 'Karine002722', 'Keith001357', 'Julien000264', 'Leah002941', 'Violet005013', 'Lorraine000463', 'Sage005401', 'Rene009984', 'Carmen000308', 'Nigel000855', 'Chantal004767', 'Alexandre003430', 'Whitney009256', 'Blandine003382', 'Hope008456', 'Amber006026', 'Holly007433', 'Josiah006329', 'Denise003781', 'Molly000452', 'Liam000638', 'Virginie007637', 'Reid006001', 'Cole008060', 'Ryan008603', 'Walter000136', 'Gabriel006135', 'Matilda005481', 'Mathilde003455', 'Duncan005137', 'Jack001266', 'Connor007625', 'Patrick008710', 'Sidney000794', 'Andrew005074', 'Christopher003089', 'Kenneth009835', 'Matthew005898', 'Nova009660', 'Joelle009261', 'Rebecca000993', 'Emmanuel006961', 'Hannah009747', 'Sebastian007713', 'Brody002386', 'Marc005064', 'Eliot004581', 'Henri006214', 'Destiny002358', 'Barry002496', 'David001912', 'Declan004521', 'Imogen006102', 'Chloe003144', 'Tiffany003332', 'Hazel003603', 'Leonard003265', 'Ivan006187', 'Mark009683', 'Malik003106', 'Isaiah000938', 'Carl006690', 'Cecilia005769', 'Gerald001611', 'Caroline004673', 'Baptiste000934', 'Rosalie009388', 'Rory008343', 'Herve006856', 'Clara007691', 'Zara003780', 'Gavin009029', 'Mederic006360', 'Ruby008967', 'Aidan003824', 'Jasmine005170', 'Albert003944', 'Grace002725', 'Jerome006424', 'Rosemary000920', 'Claire007800', 'Emile007359', 'Alice006499', 'Emmanuelle009224', 'Hunter009949', 'Ophelia003651', 'Ella000101', 'Patrice005942', 'Abigail006192', 'Felicity001128', 'Odile004040', 'Quentin000400', 'Brian000960', 'Colette009628', 'Denis005865', 'Severine000422', 'Enzo009625', 'Helene003505', 'Henry008560', 'Quinn006423', 'Louis004016', 'Maelie000479', 'Harold009206', 'Simon004791', 'Nina007426', 'Victor009369', 'Martial008059', 'Bastien001037', 'Willa005898', 'Anaelle000221', 'Bonnie006241', 'Sylvain005971', 'Lachlan009892', 'Wyatt009298', 'Kristen005523' ];
+
+    let currentDataList = [...DEFAULT_EMAILS];
+    let currentIndex = 0; // 0-based internal index
+    let isBaseOne = true; // Display as 1 to N by default
+
+    // DOM References
+    const emailText = document.getElementById('emailText');
+    const currentIndexDisplay = document.getElementById('currentIndexDisplay');
+    const totalCountDisplay = document.getElementById('totalCountDisplay');
+    const progressBar = document.getElementById('progressBar');
+    const jumpIndexInput = document.getElementById('jumpIndexInput');
+    const autoCopyToggle = document.getElementById('autoCopyToggle');
+    const domainSelect = document.getElementById('domainSelect');
+    const customDomainInput = document.getElementById('customDomainInput');
+    const rawTextarea = document.getElementById('rawTextarea');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+
+    // Helper to get formatted domain
+    function getDomain() {
+      const selected = domainSelect.value;
+      if (selected === 'custom') {
+        return customDomainInput.value.trim();
+      }
+      return selected;
+    }
+
+    // Get current formatted email string
+    function getCurrentEmailString() {
+      if (!currentDataList || currentDataList.length === 0) return '';
+      const rawItem = currentDataList[currentIndex] || '';
+      const domain = getDomain();
+      
+      // If rawItem already contains @ or domain is empty, don't duplicate domain
+      if (rawItem.includes('@') || !domain) {
+        return rawItem;
+      }
+      return rawItem + domain;
+    }
+
+    // Update UI elements
+    function updateEmailDisplay() {
+      if (currentDataList.length === 0) {
+        emailText.textContent = "Danh sách trống";
+        currentIndexDisplay.textContent = "0";
+        totalCountDisplay.textContent = "0";
+        progressBar.style.width = "0%";
+        return;
+      }
+
+      const emailStr = getCurrentEmailString();
+      emailText.textContent = emailStr;
+
+      // Update Index display based on preference (1-based vs 0-based)
+      const displayIdx = isBaseOne ? (currentIndex + 1) : currentIndex;
+      currentIndexDisplay.textContent = displayIdx;
+      totalCountDisplay.textContent = currentDataList.length;
+
+      // Update Input placeholder/value
+      jumpIndexInput.placeholder = displayIdx;
+      jumpIndexInput.max = isBaseOne ? currentDataList.length : currentDataList.length - 1;
+      jumpIndexInput.min = isBaseOne ? 1 : 0;
+
+      // Update Progress bar
+      const progressPercent = ((currentIndex + 1) / currentDataList.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // Copy current email to clipboard
+    function copyCurrentEmail() {
+      const email = getCurrentEmailString();
+      if (!email) return;
+
+      // Primary clipboard API or fallback for iframe compatibility
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(() => {
+          showCopySuccessFeedback(email);
+        }).catch(() => {
+          fallbackCopyText(email);
+        });
+      } else {
+        fallbackCopyText(email);
+      }
+    }
+
+    // Fallback copy using text range / execCommand
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showCopySuccessFeedback(text);
+        }
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    // Visual feedback on successful copy
+    function showCopySuccessFeedback(copiedText) {
+      // Toast alert
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = `Đã copy #${isBaseOne ? currentIndex + 1 : currentIndex}: ${copiedText}`;
+      
+      toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+      }, 1800);
+
+      // Button flash animation
+      const copyBtn = document.getElementById('copyBtn');
+      const copyBtnText = document.getElementById('copyBtnText');
+      const copyIcon = document.getElementById('copyIcon');
+
+      copyBtnText.textContent = "ĐÃ COPY!";
+      copyIcon.className = "fa-solid fa-check text-lg";
+      copyBtn.classList.remove('from-indigo-600', 'to-blue-600');
+      copyBtn.classList.add('from-emerald-500', 'to-teal-600');
+
+      setTimeout(() => {
+        copyBtnText.textContent = "COPY EMAIL";
+        copyIcon.className = "fa-regular fa-copy text-lg";
+        copyBtn.classList.remove('from-emerald-500', 'to-teal-600');
+        copyBtn.classList.add('from-indigo-600', 'to-blue-600');
+      }, 1000);
+    }
+
+    // Next Email
+    function nextEmail() {
+      if (currentDataList.length === 0) return;
+      if (currentIndex < currentDataList.length - 1) {
+        currentIndex++;
+      } else {
+        // Loop back to start
+        currentIndex = 0;
+      }
+      updateEmailDisplay();
+
+      if (autoCopyToggle.checked) {
+        copyCurrentEmail();
+      }
+    }
+
+    // Previous Email
+    function prevEmail() {
+      if (currentDataList.length === 0) return;
+      if (currentIndex > 0) {
+        currentIndex--;
+      } else {
+        // Loop to end
+        currentIndex = currentDataList.length - 1;
+      }
+      updateEmailDisplay();
+
+      if (autoCopyToggle.checked) {
+        copyCurrentEmail();
+      }
+    }
+
+    // Jump to input index
+    function jumpToInputIndex() {
+      const val = parseInt(jumpIndexInput.value, 10);
+      if (isNaN(val)) return;
+
+      let targetIdx = isBaseOne ? (val - 1) : val;
+
+      if (targetIdx < 0) targetIdx = 0;
+      if (targetIdx >= currentDataList.length) targetIdx = currentDataList.length - 1;
+
+      currentIndex = targetIdx;
+      updateEmailDisplay();
+      jumpIndexInput.value = '';
+
+      if (autoCopyToggle.checked) {
+        copyCurrentEmail();
+      }
+    }
+
+    // Event listener for enter key in index input
+    jumpIndexInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        jumpToInputIndex();
+      }
+    });
+
+    // Domain selection handler
+    function handleDomainChange() {
+      if (domainSelect.value === 'custom') {
+        customDomainInput.classList.remove('hidden');
+        customDomainInput.focus();
+      } else {
+        customDomainInput.classList.add('hidden');
+      }
+      updateEmailDisplay();
+    }
+
+    // Index base change handler
+    function handleIndexBaseChange() {
+      const val = document.getElementById('indexBaseSelect').value;
+      isBaseOne = (val === '1');
+      updateEmailDisplay();
+    }
+
+    // Settings Toggle
+    function toggleSettings() {
+      settingsPanel.classList.toggle('hidden');
+    }
+
+    toggleSettingsBtn.addEventListener('click', toggleSettings);
+
+    // Apply custom data from textarea
+    function applyCustomData() {
+      const text = rawTextarea.value.trim();
+      if (!text) return;
+
+      // Parse lines or comma separated values
+      const items = text.split(/[\n,]+/).map(item => item.trim()).filter(item => item.length > 0);
+
+      if (items.length > 0) {
+        currentDataList = items;
+        currentIndex = 0;
+        updateEmailDisplay();
+        showCopySuccessFeedback(`Đã nạp ${items.length} danh mục mới!`);
+      }
+    }
+
+    // Reset default data
+    function resetToDefaultData() {
+      currentDataList = [...DEFAULT_EMAILS];
+      rawTextarea.value = DEFAULT_EMAILS.join('\n');
+      currentIndex = 0;
+      updateEmailDisplay();
+      showCopySuccessFeedback("Đã khôi phục 300 mẫu mặc định!");
+    }
+
+    // Global Keyboard Shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Ignore keyboard shortcuts if focus is in input or textarea
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === 'Enter') {
+        e.preventDefault();
+        nextEmail();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevEmail();
+      } else if (e.code === 'Space' || e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        copyCurrentEmail();
+      }
+    });
+
+    window.onload = function() {
+      // Populate raw textarea with defaults
+      rawTextarea.value = DEFAULT_EMAILS.join('\n');
+      
+      // Initial display setup
+      updateEmailDisplay();
+    };
+  </script>
+</body>
+</html>
